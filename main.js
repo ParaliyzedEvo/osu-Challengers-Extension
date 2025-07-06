@@ -11,7 +11,7 @@
 
 (async function() {
   'use strict';
-  console.log('[OTC] 🔥 v1.7 start');
+  console.log('[OTC] 🔥 v1.8.9 start');
 
   // ── CONFIG ──
   const SUPABASE_URL      = 'https://yqgqoxgykswytoswqpkj.supabase.co';
