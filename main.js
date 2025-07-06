@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         osu! O!c Mode Injector (v1.8.9 with toggle)
+// @name         osu! O!c Mode Injector v1.9.0
 // @namespace    http://tampermonkey.net/
-// @version      1.8.7
+// @version      1.9.0
 // @description  Toggle between default stats and O!c Mode custom panel 🎉
 // @match        https://osu.ppy.sh/users/*
 // @match        https://osu.ppy.sh/u/*
@@ -11,7 +11,7 @@
 
 (async function() {
   'use strict';
-  console.log('[OTC] 🔥 v1.8.9 start');
+  console.log('[OTC] 🔥 v1.9.0 start');
 
   // ── CONFIG ──
   const SUPABASE_URL      = 'https://yqgqoxgykswytoswqpkj.supabase.co';
@@ -72,12 +72,25 @@
     display: flex !important;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
-  /* remove any odd padding on dt/dd so they line up */
+
   .oc-panel__entry dt,
   .oc-panel__entry dd {
     margin: 0;
     padding: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .oc-panel__entry dt {
+    font-weight: 600;
+    min-width: 120px; /* or whatever width fits best */
+  }
+
+  .oc-panel__entry dd {
+    text-align: right;
   }
 `;
     document.head.appendChild(alignStyle);
@@ -105,7 +118,8 @@
   }
 
   // ── 2) Fetch our “me” row and seasonRank ──
-  const osuId = parseInt(location.pathname.split('/')[2], 10);
+const USE_MANUAL_ID = false;
+const osuId = USE_MANUAL_ID ? 22228239 : parseInt(location.pathname.split('/')[2], 10);
   if (!osuId) return;
   console.log('[OTC] osuId =', osuId);
 
@@ -127,9 +141,17 @@
     [RPC_SEASON_SEASON_KEY]:   SEASON_ID,
   });
   if (!Array.isArray(board)) return console.error('[OTC] ❌ bad leaderboard');
-  const me = board.find(r => r.is_target_user);
-  if (!me) return console.warn('[OTC] ⚠️ not on leaderboard');
-  const seasonRank = me.position;
+  let me = board.find(r => r.is_target_user);
+  if (!me) {
+    console.warn('[OTC] ⚠️ not on leaderboard — using defaults');
+    me = {
+      position: 0,
+      challenges_participated: 0,
+      average_accuracy: 0,
+      percentile: 0,
+    };
+  }
+const seasonRank = me.position;
   console.log('[OTC] seasonRank =', seasonRank);
 
 
@@ -175,7 +197,7 @@
 
         // 3) format helpers
         const fmtNum = v => typeof v === 'number' ? v.toLocaleString() : v;
-        const fmtPct = v => typeof v === 'number' ? (v*100).toFixed(2)+'%' : null;
+        const fmtPct = v => typeof v === 'number' ? v.toFixed(2)+'%' : null;
 
         // 4) build array of [key, label, value]
         const entries = [
@@ -189,10 +211,10 @@
             ['replays_watched','Replays Watched',   fmtNum(comp.replays_watched_by_others)],
 
             // your seasonal stats:
-            ['otc_rank',       'O!c Rank',          `#${seasonRank}`],
-            ['challenges',     'Challenges',        me.challenges_participated],
-            ['avg_accuracy',   'Avg Accuracy',      fmtPct(me.average_accuracy)],
-            ['percentile',     'Percentile',        fmtPct(me.percentile)],
+            ['otc_rank',       'O!c Rank: ',          `#${seasonRank}`],
+            ['challenges',     'Challenges: ',        me.challenges_participated],
+            ['avg_accuracy',   'Avg Accuracy: ',      fmtPct(me.average_accuracy)],
+            ['percentile',     'Percentile: ',        fmtPct(me.percentile)],
         ];
 
         // 5) clone only the non‐null values
