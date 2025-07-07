@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         osu! O!c Mode Injector
 // @namespace    http://tampermonkey.net/
-// @version      1.9.2
+// @version      1.9.3
 // @description  Toggle between default stats and O!c Mode custom panel. By Paraliyzed_evo and Thunderbirdo
 // @match        https://osu.ppy.sh/users/*
 // @match        https://osu.ppy.sh/u/*
@@ -9,9 +9,25 @@
 // @grant        none
 // ==/UserScript==
 
+const injectNoProfileMessage = () => {
+  const titleRow = document.querySelector('.header-v4__row--title');
+  const titleDiv = titleRow?.querySelector('.header-v4__title');
+  if (!titleDiv || titleDiv.querySelector('.oc-no-profile-message')) return;
+
+  const span = document.createElement('span');
+  span.className = 'oc-no-profile-message';
+  span.style.cssText = `
+    margin-left:320px;
+    font-size:12px;
+    color:gray;
+  `;
+  span.textContent = 'No osu!Challengers profile found';
+  titleDiv.appendChild(span);
+};
+
 (async function () {
   'use strict';
-  console.log('[OTC] 🔥 v1.9.2 start');
+  console.log('[OTC] 🔥 v1.9.3 start');
 
   // ── CONFIG ──
   const SUPABASE_URL = 'https://yqgqoxgykswytoswqpkj.supabase.co';
@@ -54,6 +70,8 @@
       padding: 0;
       white-space: nowrap;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
     }
     .oc-panel__entry dt { font-weight: 600; min-width: 120px; }
     .oc-panel__entry dd { text-align: right; }
@@ -122,8 +140,12 @@
       : rawInt && typeof rawInt === 'object'
         ? Object.values(rawInt).find(v => typeof v === 'number')
         : null;
-  if (!internalId) return console.error('[OTC] ❌ could not resolve internalId');
-  console.log('[OTC] internalId =', internalId);
+
+  if (!internalId) {
+	  console.error('[OTC] ❌ could not resolve internalId');
+      setTimeout(injectNoProfileMessage, 1000);
+	  return;
+  }
 
   const board = await callRpc('get_season_leaderboard_with_user', {
     user_id_param: internalId,
