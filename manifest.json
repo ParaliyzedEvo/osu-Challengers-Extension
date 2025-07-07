@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "osu!Challengers Extension",
+  "version": "1.0.0",
+  "description": "Toggle between default stats and osu!Challengers stats! By Paraliyzed_evo and Thunderbirdo",
+  "permissions": [],
+  "host_permissions": [
+    "https://osu.ppy.sh/users/*",
+    "https://osu.ppy.sh/u/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://osu.ppy.sh/users/*",
+        "https://osu.ppy.sh/u/*"
+      ],
+      "js": ["main.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "osu!Challengers Extension"
+  },
+  "icons": {
+    "128": "icon128.png",
+    "258": "icon256.png"
+  }
+}
