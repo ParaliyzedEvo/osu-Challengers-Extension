@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         osu! O!c Mode Injector v1.9.0 
+// @name         osu! O!c Mode Injector
 // @namespace    http://tampermonkey.net/
-// @version      1.9.0
+// @version      1.9.1
 // @description  Toggle between default stats and O!c Mode custom panel 🎉
 // @match        https://osu.ppy.sh/users/*
 // @match        https://osu.ppy.sh/u/*
@@ -11,7 +11,7 @@
 
 (async function() {
   'use strict';
-  console.log('[OTC] 🔥 v1.9.0 start');
+  console.log('[OTC] 🔥 v1.9.1 start');
 
   // ── CONFIG ──
   const SUPABASE_URL      = 'https://yqgqoxgykswytoswqpkj.supabase.co';
@@ -276,8 +276,8 @@ const seasonRank = me.position;
             ['replays_watched','Replays Watched',   fmtNum(comp.replays_watched_by_others)],
 
             // your seasonal stats:
-            ['otc_rank',       'O!c Rank: ',          `#${seasonRank}`],
-            ['challenges',     'Challenges: ',        me.challenges_participated],
+            ['otc_rank',       'Challenger Rank: ',          `#${seasonRank}`],
+            ['challenges',     'Participation: ',        me.challenges_participated],
             ['avg_accuracy',   'Avg Accuracy: ',      fmtPct(me.average_accuracy)],
             ['percentile',     'Percentile: ',        fmtPct(me.percentile)],
         ];
@@ -417,5 +417,98 @@ const seasonRank = me.position;
         });
         obs.observe(document.body, { childList: true, subtree: true });
     }
+
+// ── Inject Custom Badges for Specific osu! IDs ──
+
+const BADGE_CONFIG = [
+  {
+    ids: [19637339, 22228239],
+    label: 'DEV',
+    color: '#E45678',
+    classMod: 'dev',
+    title: 'Developers',
+  },
+  {
+    ids: [15657407],
+    label: 'GFX',
+    color: '#0066FF',
+    classMod: 'gfx',
+    title: 'Effects Designer',
+  },
+  {
+    ids: [24071806],
+    label: 'Leader',
+    color: '#FFFFFF',
+    classMod: 'PL',
+    title: 'Project Leader',
+    width: '52px',
+  },
+];
+
+function createBadge({ label, color, classMod, title, width = '40px' }) {
+  const el = document.createElement('a');
+  el.className = `user-group-badge user-group-badge--${classMod} user-group-badge--profile-page`;
+  el.dataset.label = label;
+  el.dataset.origTitle = title;
+  el.href = 'https://paraliyzed.net';
+  el.dataset.hasqtip = '0';
+  el.setAttribute('aria-describedby', 'qtip-0');
+  el.style.setProperty('--group-colour', color);
+  el.style.cssText += `
+    height: 15px;
+    width: ${width};
+    font-size: 12px;
+  `;
+  return el;
+}
+
+function injectBadge(labelClass, badgeEl) {
+  const observer = new MutationObserver((_, obs) => {
+    const nameHeader = document.querySelector('.profile-info__info .profile-info__name');
+    if (!nameHeader) return;
+
+    if (!nameHeader.querySelector(`.user-group-badge--${labelClass}`)) {
+      nameHeader.appendChild(badgeEl);
+    }
+
+    obs.disconnect();
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+for (const cfg of BADGE_CONFIG) {
+  if (cfg.ids.includes(osuId)) {
+    injectBadge(cfg.classMod, createBadge(cfg));
+  }
+}
+
+// ── Special gradient effect for Paraliyzed_evo ──
+if (osuId === 19637339) {
+  const gradientObserver = new MutationObserver((_, obs) => {
+    const nameContainer = document.querySelector('.profile-info__info .profile-info__name');
+    if (!nameContainer) return;
+
+    const spans = nameContainer.querySelectorAll('span.u-ellipsis-pre-overflow');
+
+    for (const span of spans) {
+      if (
+        span.textContent.trim().startsWith('[') ||
+        span.dataset.gradientApplied
+      ) continue;
+
+      span.style.background = 'linear-gradient(to right, #0000ff 45%, #7b00ff 55%)';
+      span.style.webkitBackgroundClip = 'text';
+      span.style.webkitTextFillColor = 'transparent';
+      span.style.fontWeight = 'bold';
+      span.dataset.gradientApplied = 'true';
+      break;
+    }
+
+    obs.disconnect();
+  });
+
+  gradientObserver.observe(document.body, { childList: true, subtree: true });
+}
 
 })();
