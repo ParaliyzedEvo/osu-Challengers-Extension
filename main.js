@@ -265,7 +265,7 @@
 
   // ── Custom Badges ──
   const BADGE_CONFIG = [
-    { ids: [19637339, 22228239], label: 'DEV', color: '#E45678', classMod: 'dev', title: 'Developers' },
+    { ids: [19637339, 22228239, 32657919], label: 'DEV', color: '#E45678', classMod: 'dev', title: 'Developers' },
     { ids: [15657407], label: 'GFX', color: '#0066FF', classMod: 'gfx', title: 'Effects Designer' },
     { ids: [24071806], label: 'Leader', color: '#FFFFFF', classMod: 'PL', title: 'Project Leader', width: '52px' },
   ];
