@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         osu! O!c Mode Injector v1.9.0
+// @name         osu! O!c Mode Injector v1.9.0 
 // @namespace    http://tampermonkey.net/
 // @version      1.9.0
 // @description  Toggle between default stats and O!c Mode custom panel 🎉
@@ -18,6 +18,12 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZ3FveGd5a3N3eXRvc3dxcGtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3MTkxNTEsImV4cCI6MjA2NDI5NTE1MX0.cIWfvz9dlSWwYy7QKSmWpEHc1KVzpB77VzB7TNhQ2ec';
   const SEASON_ID         = 1;
 
+  const TOGGLE_ON_IMG  = 'https://up.heyuri.net/src/4597.png';
+  const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
+  const RULES_IMG       = 'https://up.heyuri.net/src/4600.png';
+  const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
+
+
   const RPC_GET_INTERNAL      = 'get_user_id_from_osu_id';
   const RPC_GET_INTERNAL_KEY  = 'p_osu_id';
   const RPC_SEASON_FUNC       = 'get_season_leaderboard_with_user';
@@ -32,6 +38,7 @@
   const RANK_CARD_SEL       = '.value-display--rank';
   const TOGGLE_BUTTON_SEL   = '.profile-detail__cover .osu-layout-button[value="osu"]';
 
+    let _imgClones = [];
 
     const ocStyle = document.createElement('style');
     ocStyle.textContent = `
@@ -94,6 +101,64 @@
   }
 `;
     document.head.appendChild(alignStyle);
+
+    // ─── RULES BUTTON + EXTRA PUSH-DOWN ───
+    const rulesStyle = document.createElement('style');
+    rulesStyle.textContent = `
+  .profile-detail__stats {
+    position: relative;
+  }
+  .oc-rules-btn {
+    display: none;
+    position: absolute;
+    top: -1.1rem;        /* move the button closer to the top edge */
+    right: 1rem;
+    z-index: 10;
+  }
+  .profile-detail__stats.oc-mode .oc-rules-btn {
+    display: block !important;
+  }
+
+  /* bump this up until all your stats sit below the button */
+  .profile-detail__stats.oc-mode .profile-stats {
+    padding-top: 6rem !important;  /* ← try 6rem (96px) or tweak as needed */
+  }
+  .oc-rules-btn img {
+    height: 32px;
+    cursor: pointer;
+  }
+`;
+    document.head.appendChild(rulesStyle);
+
+
+
+
+
+
+
+    const toggleFx = document.createElement('style');
+    toggleFx.textContent = `
+  /* fade the icon in/out */
+  #otc-toggle-img {
+    transition: opacity 150ms ease-in-out;
+    opacity: 1;
+  }
+  /* scale up slightly on hover */
+  #otc-toggle-btn:hover #otc-toggle-img {
+    transform: scale(1.1);
+  }
+`;
+    document.head.appendChild(toggleFx);
+
+    const statsFx = document.createElement('style');
+    statsFx.textContent = `
+  /* smooth opacity transition for the stats panel */
+  .profile-detail__stats {
+    transition: opacity 150ms ease-in-out;
+  }
+`;
+    document.head.appendChild(statsFx);
+
 
 
     // ── 1) Generic REST-RPC caller ──
@@ -241,14 +306,34 @@ const seasonRank = me.position;
     // 2) Locate the right‐hand stats panel (the one that contains "Ranked Score")
     //GONE
 
-  // ── 5) Toggle handler ──
     function toggleOCMode() {
         const statsRoot = document.querySelector('.profile-detail__stats');
         if (!statsRoot) return;
-        statsRoot.classList.toggle('oc-mode');
-        const on = statsRoot.classList.contains('oc-mode');
-        document.getElementById('otc-toggle-btn').textContent = on ? 'Exit O!c' : 'O!c Mode';
+
+        // 1) fade OUT
+        statsRoot.style.opacity = 0;
+
+        // 2) after the fade-out completes, swap classes & fade IN
+        setTimeout(() => {
+            const on = statsRoot.classList.toggle('oc-mode');
+            document.documentElement.classList.toggle('oc-ui', on);
+
+            // update the icon the same delayed way
+            const img = document.getElementById('otc-toggle-img');
+            if (img) {
+                img.style.opacity = 0;
+                setTimeout(() => {
+                    img.src = on ? TOGGLE_ON_IMG : TOGGLE_OFF_IMG;
+                    img.style.opacity = 1;
+                }, 150);
+            }
+
+            // now fade the stats panel back in
+            statsRoot.style.opacity = 1;
+        }, 150);
+
     }
+
 
 
 
@@ -256,69 +341,81 @@ const seasonRank = me.position;
 
 
     function injectToggleButton() {
-        // Find the “player info” title row
         const titleRow = document.querySelector('.header-v4__row--title');
-        // Bail if it’s not there yet or if we already injected our button
         if (!titleRow || document.getElementById('otc-toggle-btn')) return false;
 
-        // Create the button
+        // create the button
         const btn = document.createElement('button');
         btn.id = 'otc-toggle-btn';
-        btn.textContent = 'O!c Mode';
         btn.style.cssText = `
-    margin-left: auto;
-    padding: 0.3em 0.6em;
-    border: none;
-    border-radius: 4px;
-    background-color: #00c7fc;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
+    border: none; background: none; padding: 0;
+    margin-left: auto; cursor: pointer;
   `;
 
-        // Wire it up
-        btn.addEventListener('click', e => {
-            e.preventDefault();
-            buildCustomPanel();   // ensure our panel exists
-            toggleOCMode();       // toggle into/out of O!c Mode
-        });
+        // create the img
+        const img = document.createElement('img');
+        img.id = 'otc-toggle-img';
+        img.src = TOGGLE_OFF_IMG;     // start in the “off” state
+        img.style.cssText = `
+    width: 32px; height: 32px;
+  `;
 
-        // Append to the title row (it’s already a flex container)
+        btn.appendChild(img);
+        btn.addEventListener('click', toggleOCMode);
         titleRow.appendChild(btn);
-        console.log('[OTC] injected O!c Mode toggle into header-v4__row--title');
         return true;
     }
 
-    // At the bottom of your IIFE, run it once or observe until it’s there:
-    if (!injectToggleButton()) {
-        new MutationObserver((_, obs) => {
-            if (injectToggleButton()) obs.disconnect();
-        }).observe(document.body, { childList: true, subtree: true });
-    }
+
+    function injectRulesButton() {
+        if (document.querySelector('.oc-rules-btn')) return;
+
+        const link = document.createElement('a');
+        link.className = 'oc-rules-btn';
+        link.href   = `https://osu-challenge-tracker.vercel.app/profile/${internalId}`;
+        link.target = '_blank';
+        link.rel    = 'noopener noreferrer';
+
+        // 2) Create the <img> with the default src
+        const img = document.createElement('img');
+        img.src = RULES_IMG;
+        img.alt = 'O!c Rules';
+        img.style.height = '75px';
+        img.style.width  = 'auto';
+        img.style.transition = 'transform 100ms ease, opacity 100ms ease';
+
+        img.style.transition = 'opacity 200ms ease-in-out, transform 100ms ease-in-out';
+        img.style.opacity    = '1';
 
 
-
-
-    // ── 6) Wire up button & ensure panel exists ──
-    let toggleBtn = null;
-    const setup = () => {
-        // button lives under profile-detail__cover as <button value="osu">osu!</button>
-        toggleBtn = document.querySelector(TOGGLE_BUTTON_SEL);
-        if (!toggleBtn) return false;
-        // rename & attach handler
-        toggleBtn.textContent = 'O!c Mode';
-        toggleBtn.addEventListener('click', e => {
-            e.preventDefault();
-            buildCustomPanel();
-            toggleOCMode();
+        // 3) Swap src + scale on hover
+        img.addEventListener('mouseenter', () => {
+            img.src = RULES_HOVER_IMG;
+            img.style.transform = 'scale(1.1)';
         });
-        return true;
-    };
+        img.addEventListener('mouseleave', () => {
+            img.src = RULES_IMG;
+            img.style.transform = 'scale(1)';
+        });
 
-    // try once, otherwise observe
-    if (!setup()) {
-        new MutationObserver((_, obs) => {
-            if (setup()) obs.disconnect();
-        }).observe(document.body, { childList: true, subtree: true });
-  }
+        link.appendChild(img);
+
+        // 4) Prepend into the stats panel
+        const statsRoot = document.querySelector('.profile-detail__stats');
+        if (statsRoot) statsRoot.prepend(link);
+    }
+
+    // call it after you have `internalId`
+    injectRulesButton();
+
+
+
+    // ── Inject our image‐based toggle button ──
+    if (!injectToggleButton()) {
+        const obs = new MutationObserver((_, o) => {
+            if (injectToggleButton()) o.disconnect();
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+    }
+
 })();
