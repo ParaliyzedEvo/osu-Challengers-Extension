@@ -287,22 +287,27 @@ const injectNoProfileMessage = () => {
 
   // ── Custom Badges ──
   const BADGE_CONFIG = [
-    { ids: [19637339, 22228239, 32657919], label: 'DEV', color: '#E45678', classMod: 'dev', title: 'Developers' },
-    { ids: [15657407], label: 'GFX', color: '#0066FF', classMod: 'gfx', title: 'Effects Designer' },
-    { ids: [24071806], label: 'Leader', color: '#FFFFFF', classMod: 'PL', title: 'Project Leader', width: '52px' },
+    { ids: [19637339, 22228239, 32657919], classMod: 'dev', title: 'Developers', src: 'https://paraliyzed.net/img/dev.webp' },
+    { ids: [15657407], classMod: 'gfx', title: 'Effects Designer', src: 'https://paraliyzed.net/img/gfx.webp' },
+    { ids: [24071806], classMod: 'pl', title: 'Project Lead', src: 'https://paraliyzed.net/img/lead.webp' },
   ];
 
-  function createBadge({ label, color, classMod, title, width = '40px' }) {
-    const el = document.createElement('a');
-    el.className = `user-group-badge user-group-badge--${classMod} user-group-badge--profile-page`;
-    el.dataset.label = label;
-    el.dataset.origTitle = title;
-    el.href = 'https://paraliyzed.net';
-    el.dataset.hasqtip = '0';
-    el.setAttribute('aria-describedby', 'qtip-0');
-    el.style.setProperty('--group-colour', color);
-    el.style.cssText += `height:15px;width:${width};font-size:12px;`;
-    return el;
+  function createBadge({ classMod, title, src }) {
+    const link = document.createElement('a');
+    link.href = 'https://paraliyzed.net';
+
+    const img = document.createElement('img');
+    img.alt = title;
+    img.src = src;
+    img.setAttribute('data-orig-title', title);
+    img.setAttribute('data-hasqtip', '1');
+    img.setAttribute('aria-describedby', 'qtip-1');
+    img.style.height = '31px';
+    img.style.width = 'auto';
+    img.style.transform = 'translate(-7px, 2px)';
+
+    link.appendChild(img);
+    return link;
   }
 
   function injectBadge(labelClass, badgeEl) {
