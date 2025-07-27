@@ -175,10 +175,12 @@
     }));
 
   if (osuId === 14540907)
-    injectUsernameStyle(osuId, span => {
-      span.style.color = 'red';
-      span.style.fontWeight = 'bold';
-    });
+    injectUsernameStyle(osuId, span => Object.assign(span.style, {
+      background: 'linear-gradient(to right, #7b00ff 45%, #ff0000 55%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      fontWeight: 'bold',
+    }));
 
   // Helpers
   async function callRpc(name, params) {
