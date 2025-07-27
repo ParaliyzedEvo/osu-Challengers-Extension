@@ -176,7 +176,7 @@
 
   if (osuId === 14540907)
     injectUsernameStyle(osuId, span => Object.assign(span.style, {
-      background: 'linear-gradient(to right, #7b00ff 45%, #ff0000 55%)',
+      background: 'linear-gradient(to right, #ff0000 35%, #7b00ff 65%)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       fontWeight: 'bold',
