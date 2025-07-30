@@ -1,22 +1,17 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'fetch') {
     fetch(message.url, {
-      method: message.method,
-      headers: message.headers,
-      body: message.body
+      method: message.method || 'GET',
+      headers: message.headers || {},
+      body: message.body || null,
     })
-    .then(res => res.text())
-    .then(text => {
-      sendResponse({
-        success: true,
-        data: text
-      });
+    .then(response => response.text())
+    .then(data => {
+      sendResponse({ success: true, data });
     })
-    .catch(err => {
-      sendResponse({
-        success: false,
-        error: err.toString()
-      });
+    .catch(error => {
+      console.error('[BG] Fetch failed:', error);
+      sendResponse({ success: false, error: error.toString() });
     });
 
     return true;
