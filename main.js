@@ -7,11 +7,6 @@
 // @match        https://osu.ppy.sh/u/*
 // @connect      ppy.sh
 // @grant        GM.xmlHttpRequest
-// @grant        GM.setValue
-// @grant        GM.getValue
-// @grant        GM_xmlhttpRequest
-// @grant        GM_setValue
-// @grant        GM_getValue
 // ==/UserScript==
 
 (async function () {
