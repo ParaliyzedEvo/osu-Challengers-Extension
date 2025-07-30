@@ -267,7 +267,7 @@ async function injectChallengersPage(internalId) {
 
   try {
     // Api
-    const apiData = await crossOriginFetch(`https://challengersnexus.com/api/user/profile/${internalId}`);
+    const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
     const apiUser = apiData?.data?.user || {};
     const apiStats = apiData?.data?.stats || {};
     const apiStreaks = apiData?.data?.streaks || {};
