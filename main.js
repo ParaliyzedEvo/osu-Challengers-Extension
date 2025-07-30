@@ -1,14 +1,3 @@
-// ==UserScript==
-// @name         osu! O!c Mode Injector
-// @namespace    http://tampermonkey.net/
-// @version      2.1.0
-// @description  Toggle between default stats and O!c Mode custom panel. By Paraliyzed_evo and Thunderbirdo
-// @match        https://osu.ppy.sh/users/*
-// @match        https://osu.ppy.sh/u/*
-// @connect      ppy.sh
-// @grant        GM.xmlHttpRequest
-// ==/UserScript==
-
 (async function () {
   'use strict';
   console.log('[OTC] 🔥 v2.1.0 start');
@@ -25,6 +14,29 @@
   const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
   const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
 
+  function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(
+      {
+        type: 'fetch',
+        url,
+        method,
+        headers,
+        body
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError.message);
+        } else if (response.success) {
+          resolve(JSON.parse(response.data));
+        } else {
+          reject(response.error);
+        }
+      }
+    );
+  });
+}
+
   const BADGE_CONFIG = [
     { ids: [19637339, 22228239, 32657919], classMod: 'dev', title: 'Developers', src: 'https://paraliyzed.net/img/dev.webp' },
     { ids: [15657407, 31708435], classMod: 'gfx', title: 'Effects Designer', src: 'https://paraliyzed.net/img/gfx.webp' },
@@ -36,62 +48,47 @@
   ];
 
   // Global styles
-  const styles = [
-  `
-    .oc-panel, .oc-panel__entry { display: none!important; }
-    .profile-detail__stats.oc-mode .profile-detail__chart-numbers--top svg,
-    .profile-detail__stats.oc-mode .profile-detail__chart-numbers--bottom,
-    .profile-detail__stats.oc-mode dl.profile-stats__entry:not(.oc-panel__entry) {
-      display: none!important;
-    }
-    .profile-detail__stats.oc-mode .oc-panel,
-    .profile-detail__stats.oc-mode .oc-panel__entry {
-      display: block!important;
-    }
-    `,
-    `
-    .oc-panel__entry {
-      display: flex!important;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: nowrap;
-    }
-    .oc-panel__entry dt, .oc-panel__entry dd {
-      margin: 0;
-      padding: 0;
-      white-space: nowrap;
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-    }
-    .oc-panel__entry dt { font-weight: 600; min-width: 120px; }
-    .oc-panel__entry dd { text-align: right; }
-    `,
-    `
-    .profile-detail__stats { position: relative; transition: opacity 150ms ease-in-out; }
-    .oc-rules-btn {
-      display: none; position: absolute; top: -1.1rem; right: 1rem; z-index: 10;
-    }
-    .profile-detail__stats.oc-mode .oc-rules-btn {
-      display: block!important;
-    }
-    .profile-detail__stats.oc-mode .profile-stats {
-      padding-top: 6rem!important;
-    }
-    .oc-rules-btn img {
-      height: 32px; cursor: pointer;
-    }
-    `,
-    `
-    #otc-toggle-img {
-      transition: opacity 150ms ease-in-out;
-    }
-    #otc-toggle-btn:hover #otc-toggle-img {
-      transform: scale(1.1);
-    }
-    `
-  ];
+  const styles = [`
+  .oc-challenger-container {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+
+  .oc-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Inter', sans-serif;
+    min-width: 80px;
+  }
+
+  .oc-stat-label {
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-family: Torus, Inter, 'Helvetica Neue', Tahoma, Arial, 'Hiragino Kaku Gothic ProN', Meiryo, 'Microsoft YaHei', 'Apple SD Gothic Neo', sans-serif;
+  }
+
+  .oc-stat-value {
+    font-size: 40px;
+    font-weight: 300;
+    color: #fff;
+    font-family: Torus, Inter, 'Helvetica Neue', Tahoma, Arial, 'Hiragino Kaku Gothic ProN', Meiryo, 'Microsoft YaHei', 'Apple SD Gothic Neo', sans-serif;
+  }
+
+  .oc-description {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #ccc;
+  }
+
+  .oc-challenger-block {
+  width: 100%;
+  }
+`];
   styles.forEach(css => {
     const s = document.createElement('style');
     s.textContent = css;
@@ -123,7 +120,6 @@
       const existingBadges = nameHeader.querySelectorAll('a[href="https://paraliyzed.net"]');
       const offset = 7 + (existingBadges.length * 23);
 
-      // Apply transform to the anchor, not the image
       badgeEl.style.transform = `translate(-${offset}px, 2px)`;
 
       nameHeader.appendChild(badgeEl);
@@ -134,7 +130,6 @@
   observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  // Username styling per user
   function injectUsernameStyle(userId, styleFn, delay = 1500) {
   setTimeout(() => {
     const observer = new MutationObserver((_, obs) => {
@@ -182,7 +177,6 @@
       fontWeight: 'bold',
     }));
 
-  // Helpers
   async function callRpc(name, params) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
       method: 'POST',
@@ -213,7 +207,6 @@
     titleDiv.appendChild(span);
   }
 
-  // Fetch data
   const SEASON_ID = await callRpc('get_current_season_id', {});
   const rawInt = await callRpc('get_user_id_from_osu_id', { p_osu_id: osuId });
   const internalId = typeof rawInt === 'number'
@@ -244,8 +237,6 @@
     average_accuracy: 0,
     percentile: 0,
   };
-  const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
-  const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
   function injectChallengersTab() {
   const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
@@ -267,38 +258,62 @@
   profileExtra.insertAdjacentHTML('afterbegin', challengersTabHTML);
 }
 
-  function injectChallengersPage() {
+async function injectChallengersPage(internalId) {
   const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
-  const userPages = osuPage.querySelector('.user-profile-pages.ui-sortable');
-  const challengersHTML = `
+  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
+  if (!userPages) return console.warn('Could not find user profile container.');
+
+  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
+
+  try {
+    // Api
+    const apiData = await crossOriginFetch(`https://challengersnexus.com/api/data/${internalId}`);
+    const apiUser = apiData?.data?.user || {};
+    const apiStats = apiData?.data?.stats || {};
+    const apiStreaks = apiData?.data?.streaks || {};
+    if (!apiData) return console.warn('Invalid data from API.');
+
+    // Supabase
+    const me = board?.find(r => r.is_target_user) || {};
+    const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
+    const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
+
+    const challengersHTML = `
     <div class="js-sortable--page" data-page-id="challengers">
       <div class="page-extra">
         <div class="u-relative">
           <h2 class="title title--page-extra">Challengers!</h2>
-          <span class="sortable-handle sortable-handle--profile-page-extra hidden-xs js-profile-page-extra--sortable-handle ui-sortable-handle">
-            <i class="fas fa-bars"></i>
-          </span>
         </div>
         <div class="lazy-load">
           <div class="kudosu-box">
-            <div class="value-display value-display--kudosu">
-              <div class="value-display__label">Rank</div>
-              <div class="value-display__value">1</div>
-              <div class="value-display__description">
-                :p
+            <div class="oc-challenger-block">
+              <div class="oc-challenger-container">
+                <div class="oc-stat"><div class="oc-stat-label">Current Streak</div><div class="oc-stat-value">${apiStreaks.currentStreak ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Best Streak</div><div class="oc-stat-value">${apiStreaks.longestStreak ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Avg Acc</div><div class="oc-stat-value">${fmtPct(me.average_accuracy)}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Avg Rank</div><div class="oc-stat-value">${apiStats.avgRank ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Total Plays</div><div class="oc-stat-value">${apiStats.totalScores ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">First Places</div><div class="oc-stat-value">${apiStats.firstPlaceCount ?? '-'}</div></div>
+              </div>
+              <div class="oc-challenger-container">
+                <div class="oc-stat"><div class="oc-stat-label">Current Rank</div><div class="oc-stat-value">#${me.position ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Total Score</div><div class="oc-stat-value">${apiStats.totalScorePoints ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Challenges</div><div class="oc-stat-value">${me.challenges_participated ?? '-'}</div></div>
+                <div class="oc-stat"><div class="oc-stat-label">Top</div><div class="oc-stat-value">${fmtPct(me.percentile)}</div></div>
               </div>
             </div>
           </div>
-          <div class="profile-extra-entries profile-extra-entries--kudosu">
-            :p
-          </div>
+          <div class="title title--page-extra-small">Best Performance</div>
         </div>
       </div>
     </div>
   `;
-  userPages.insertAdjacentHTML('afterbegin', challengersHTML);
-  console.log('[OTC] ✅ Challengers page injected');
+    userPages.insertAdjacentHTML('afterbegin', challengersHTML);
+  } catch (err) {
+    console.error('Failed to inject Challengers page:', err);
+  }
 }
-setTimeout(injectChallengersPage, 750);
-setTimeout(injectChallengersTab, 750);
+console.log("[OTC] internalId = " + internalId);
+await injectChallengersPage(internalId);
+setTimeout(injectChallengersTab, 500);
 })();
