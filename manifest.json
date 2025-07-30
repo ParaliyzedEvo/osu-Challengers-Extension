@@ -8,17 +8,15 @@
     "128": "icon128.png",
     "256": "icon256.png"
   },
-  "action": {
+  "browser_action": {
     "default_title": "osu!Challengers Extension"
   },
   "background": {
-    "service_worker": ["background.js"],
+    "scripts": ["background.js"],
     "persistent": false
   },
   "permissions": [
-    "storage"
-  ],
-  "host_permissions": [
+    "storage",
     "https://osu.ppy.sh/users/*",
     "https://osu.ppy.sh/u/*",
     "https://challengersnexus.com/*",
@@ -34,13 +32,7 @@
       "run_at": "document_idle"
     }
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
   "web_accessible_resources": [
-    {
-      "resources": ["main.js"],
-      "matches": ["<all_urls>"]
-    }
+    "main.js"
   ]
 }
