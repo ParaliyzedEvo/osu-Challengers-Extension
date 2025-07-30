@@ -29,7 +29,7 @@
           const parsed = JSON.parse(response.data);
           resolve(parsed);
         } catch (e) {
-          console.error('[OTC] ❌ Failed to parse JSON:', response.data);
+          console.error('[OTC] ❌ Failed to parse JSON:');
           reject(e);
         }
       }
@@ -267,7 +267,7 @@ async function injectChallengersPage(internalId) {
 
   try {
     // Api
-    const apiData = await crossOriginFetch(`https://challengersnexus.com/api/data/${internalId}`);
+    const apiData = await crossOriginFetch(`https://challengersnexus.com/api/user/profile/${internalId}`);
     const apiUser = apiData?.data?.user || {};
     const apiStats = apiData?.data?.stats || {};
     const apiStreaks = apiData?.data?.streaks || {};
