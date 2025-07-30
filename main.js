@@ -1,17 +1,22 @@
 // ==UserScript==
 // @name         osu! O!c Mode Injector
 // @namespace    http://tampermonkey.net/
-// @version      2.0.0
+// @version      2.1.0
 // @description  Toggle between default stats and O!c Mode custom panel. By Paraliyzed_evo and Thunderbirdo
 // @match        https://osu.ppy.sh/users/*
 // @match        https://osu.ppy.sh/u/*
-// @run-at       document-idle
-// @grant        none
+// @connect      ppy.sh
+// @grant        GM.xmlHttpRequest
+// @grant        GM.setValue
+// @grant        GM.getValue
+// @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 (async function () {
   'use strict';
-  console.log('[OTC] 🔥 v2.0.0 start');
+  console.log('[OTC] 🔥 v2.1.0 start');
 
   const osuId = parseInt(location.pathname.split('/')[2], 10);
   if (!osuId) return;
@@ -160,7 +165,7 @@
 
   if (osuId === 19637339)
     injectUsernameStyle(osuId, span => Object.assign(span.style, {
-      background: 'linear-gradient(to right, #0000ff 45%, #7b00ff 55%)',
+      background: 'linear-gradient(to right, #ff00ff 45%, #ba00ff 55%)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       fontWeight: 'bold',
@@ -247,118 +252,58 @@
   const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
   const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
-  // Panel
-  function buildCustomPanel() {
-    const statsContainer = document.querySelector('.profile-stats');
-    if (!statsContainer || statsContainer.querySelector('.oc-panel')) return;
+  function injectChallengersTab() {
+  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
+  const extraTabs = osuPage.querySelector('.page-extra-tabs');
+  const profileExtra = extraTabs.querySelector('.page-mode--profile-page-extra.hidden-xs.ui-sortable');
+  const challengersTabHTML = `
+    <a class="page-mode__item js-sortable--tab ui-sortable-handle"
+       data-page-id="challengers"
+       href="#challengers">
+      <span class="page-mode-link page-mode-link--profile-page page-mode-link--is-active">
+        <span class="fake-bold"
+              data-content="Challengers"
+              style="color: #fac517; font-family: Torus, Inter, 'Helvetica Neue', Tahoma, Arial, 'Hiragino Kaku Gothic ProN', Meiryo, 'Microsoft YaHei', 'Apple SD Gothic Neo', sans-serif;">
+          Challengers
+        </span>
+      </span>
+    </a>
+  `;
+  profileExtra.insertAdjacentHTML('afterbegin', challengersTabHTML);
+}
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'oc-panel';
-    const template = statsContainer.querySelector('dl.profile-stats__entry');
-    if (!template) return;
-
-    const fmtNum = v => typeof v === 'number' ? v.toLocaleString() : v;
-    const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : null;
-
-    const entries = [
-      ['ranked_score', 'Ranked Score', fmtNum(comp.ranked_score)],
-      ['hit_accuracy', 'Hit Accuracy', fmtPct(comp.hit_accuracy)],
-      ['play_count', 'Play Count', fmtNum(comp.play_count)],
-      ['total_score', 'Total Score', fmtNum(comp.total_score)],
-      ['total_hits', 'Total Hits', fmtNum(comp.total_hits)],
-      ['hits_per_play', 'Hits Per Play', fmtNum(comp.hits_per_play)],
-      ['maximum_combo', 'Maximum Combo', fmtNum(comp.maximum_combo)],
-      ['replays_watched', 'Replays Watched', fmtNum(comp.replays_watched_by_others)],
-      ['otc_rank', 'Challenger Rank: ', `#${me.position}`],
-      ['challenges', 'Participation: ', me.challenges_participated],
-      ['avg_accuracy', 'Avg Accuracy: ', fmtPct(me.average_accuracy)],
-      ['percentile', 'Percentile: ', fmtPct(me.percentile)],
-    ];
-
-    entries.forEach(([key, label, val]) => {
-      if (val == null) return;
-      const dl = template.cloneNode(true);
-      dl.className = `profile-stats__entry profile-stats__entry--key-${key} oc-panel__entry`;
-      dl.querySelector('dt').textContent = label;
-      dl.querySelector('dd').textContent = val;
-      wrapper.appendChild(dl);
-    });
-
-    statsContainer.appendChild(wrapper);
-  }
-
-  function toggleOCMode() {
-    const statsRoot = document.querySelector('.profile-detail__stats');
-    if (!statsRoot) return;
-    statsRoot.style.opacity = 0;
-    setTimeout(() => {
-      const on = statsRoot.classList.toggle('oc-mode');
-      document.documentElement.classList.toggle('oc-ui', on);
-      const img = document.getElementById('otc-toggle-img');
-      if (img) {
-        img.style.opacity = 0;
-        setTimeout(() => {
-          img.src = on ? TOGGLE_ON_IMG : TOGGLE_OFF_IMG;
-          img.style.opacity = 1;
-        }, 150);
-      }
-      statsRoot.style.opacity = 1;
-    }, 150);
-  }
-
-  function injectToggleButton() {
-    const titleRow = document.querySelector('.header-v4__row--title');
-    if (!titleRow || document.getElementById('otc-toggle-btn')) return false;
-
-    const btn = document.createElement('button');
-    btn.id = 'otc-toggle-btn';
-    btn.style.cssText = 'border:none;background:none;padding:0;margin-left:auto;cursor:pointer;';
-
-    const img = document.createElement('img');
-    img.id = 'otc-toggle-img';
-    img.src = TOGGLE_OFF_IMG;
-    img.style.cssText = 'width:32px;height:32px;';
-
-    btn.appendChild(img);
-    btn.addEventListener('click', toggleOCMode);
-    titleRow.appendChild(btn);
-    return true;
-  }
-
-  function injectRulesButton() {
-    if (document.querySelector('.oc-rules-btn')) return;
-    const link = document.createElement('a');
-    link.className = 'oc-rules-btn';
-    link.href = `https://osu-challenge-tracker.vercel.app/profile/${internalId}`;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-
-    const img = document.createElement('img');
-    img.src = RULES_IMG;
-    img.alt = 'O!c Rules';
-    img.style.cssText = 'height:75px;width:auto;transition:opacity 200ms,transform 100ms;';
-
-    img.addEventListener('mouseenter', () => {
-      img.src = RULES_HOVER_IMG;
-      img.style.transform = 'scale(1.1)';
-    });
-    img.addEventListener('mouseleave', () => {
-      img.src = RULES_IMG;
-      img.style.transform = 'scale(1)';
-    });
-
-    link.appendChild(img);
-    const statsRoot = document.querySelector('.profile-detail__stats');
-    if (statsRoot) statsRoot.prepend(link);
-  }
-
-  // Inject UI
-  buildCustomPanel();
-  injectRulesButton();
-
-  if (!injectToggleButton()) {
-    new MutationObserver((_, o) => {
-      if (injectToggleButton()) o.disconnect();
-    }).observe(document.body, { childList: true, subtree: true });
-  }
+  function injectChallengersPage() {
+  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
+  const userPages = osuPage.querySelector('.user-profile-pages.ui-sortable');
+  const challengersHTML = `
+    <div class="js-sortable--page" data-page-id="challengers">
+      <div class="page-extra">
+        <div class="u-relative">
+          <h2 class="title title--page-extra">Challengers!</h2>
+          <span class="sortable-handle sortable-handle--profile-page-extra hidden-xs js-profile-page-extra--sortable-handle ui-sortable-handle">
+            <i class="fas fa-bars"></i>
+          </span>
+        </div>
+        <div class="lazy-load">
+          <div class="kudosu-box">
+            <div class="value-display value-display--kudosu">
+              <div class="value-display__label">Rank</div>
+              <div class="value-display__value">1</div>
+              <div class="value-display__description">
+                :p
+              </div>
+            </div>
+          </div>
+          <div class="profile-extra-entries profile-extra-entries--kudosu">
+            :p
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  userPages.insertAdjacentHTML('afterbegin', challengersHTML);
+  console.log('[OTC] ✅ Challengers page injected');
+}
+setTimeout(injectChallengersPage, 750);
+setTimeout(injectChallengersTab, 750);
 })();
