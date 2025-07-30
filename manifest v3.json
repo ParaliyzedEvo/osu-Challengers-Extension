@@ -36,10 +36,7 @@
   "web_accessible_resources": [
     {
       "resources": ["main.js"],
-      "matches": [
-        "https://osu.ppy.sh/users/*",
-        "https://osu.ppy.sh/u/*"
-      ]
+        "matches": ["https://osu.ppy.sh/*"]
     }
   ]
 }
