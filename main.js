@@ -1,6 +1,6 @@
 (async function () {
   'use strict';
-  console.log('[OTC] 🔥 v2.1.0 start');
+  console.log('[OTC] 🔥 v2.2.0 start');
 
   const osuId = parseInt(location.pathname.split('/')[2], 10);
   if (!osuId) return;
@@ -28,7 +28,7 @@
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError.message);
         } else if (response.success) {
-          resolve(JSON.parse(response.data));
+          resolve(typeof response.data === 'string' ? JSON.parse(response.data) : response.data);
         } else {
           reject(response.error);
         }
