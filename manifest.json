@@ -19,7 +19,7 @@
     "storage",
     "https://osu.ppy.sh/users/*",
     "https://osu.ppy.sh/u/*",
-    "https://challengersnexus.com/*",
+    "https://www.challengersnexus.com/*",
     "https://yqgqoxgykswytoswqpkj.supabase.co/*"
   ],
   "content_scripts": [
