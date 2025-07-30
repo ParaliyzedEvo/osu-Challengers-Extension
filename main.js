@@ -17,20 +17,20 @@
   function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(
-      {
-        type: 'fetch',
-        url,
-        method,
-        headers,
-        body
-      },
+      { type: 'fetch', url, method, headers, body },
       (response) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError.message);
-        } else if (response.success) {
-          resolve(typeof response.data === 'string' ? JSON.parse(response.data) : response.data);
-        } else {
-          reject(response.error);
+        if (chrome.runtime.lastError) return reject(chrome.runtime.lastError.message);
+        if (!response || typeof response.data !== 'string') {
+          console.error('[OTC] ❌ Invalid response from background:', response);
+          return reject('Invalid background response');
+        }
+
+        try {
+          const parsed = JSON.parse(response.data);
+          resolve(parsed);
+        } catch (e) {
+          console.error('[OTC] ❌ Failed to parse JSON:', response.data);
+          reject(e);
         }
       }
     );
