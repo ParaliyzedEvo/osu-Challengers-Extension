@@ -1,3 +1,21 @@
+// ==UserScript==
+// @name         osu!Challengers Extension
+// @namespace    https://github.com/ParaliyzedEvo/osu-Challengers-Extension
+// @homepageURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension
+// @supportURL   https://github.com/ParaliyzedEvo/osu-Challengers-Extension/issues
+// @updateURL    https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/main.js
+// @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/main.js
+// @author       Paraliyzed_evo and Thunderbirdo
+// @icon         https://osu.ppy.sh/favicon.ico
+// @version      2.1.1
+// @description  Extension to view osu!Challenger stats on osu!Website.
+// @match        https://osu.ppy.sh/users/*
+// @match        https://osu.ppy.sh/u/*
+// @connect      ppy.sh
+// @connect      challengersnexus.com
+// @grant        GM.xmlHttpRequest
+// ==/UserScript==
+
 (function () {
   'use strict';
     let lastUrl = location.href;
@@ -18,29 +36,6 @@
 	  const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
 	  const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
 	  const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
-	  
-	  function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
-	  return new Promise((resolve, reject) => {
-		chrome.runtime.sendMessage(
-		  { type: 'fetch', url, method, headers, body },
-		  (response) => {
-			if (chrome.runtime.lastError) return reject(chrome.runtime.lastError.message);
-			if (!response || typeof response.data !== 'string') {
-			  console.error('[OTC] ❌ Invalid response from background:', response);
-			  return reject('Invalid background response');
-			}
-
-			try {
-			  const parsed = JSON.parse(response.data);
-			  resolve(parsed);
-			} catch (e) {
-			  console.error('[OTC] ❌ Failed to parse JSON:');
-			  reject(e);
-			}
-		  }
-		);
-	  });
-	  }
 
 	  const BADGE_CONFIG = [
 		{ ids: [19637339, 22228239, 32657919], classMod: 'dev', title: 'Developers', src: 'https://paraliyzed.net/img/dev.webp' },
@@ -302,6 +297,25 @@
 	}
 
 	async function injectChallengersPage(internalId) {
+	  function fetchChallengerData(internalId) {
+	  return new Promise((resolve, reject) => {
+		GM.xmlHttpRequest({
+		  method: 'GET',
+		  url: `https://www.challengersnexus.com/api/user/profile/${internalId}`,
+		  onload: function (response) {
+			try {
+			  const data = JSON.parse(response.responseText);
+			  resolve(data);
+			} catch (err) {
+			  reject(`Invalid JSON: ${err}`);
+			}
+		  },
+		  onerror: function (err) {
+			reject(`Request failed: ${err}`);
+		  }
+		});
+	  });
+	}
 	  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
 	  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
 	  if (!userPages) return console.warn('Could not find user profile container.');
@@ -310,7 +324,7 @@
 
 	  try {
 		// Api
-		const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
+		const apiData = await fetchChallengerData(internalId);
 		const apiUser = apiData?.data?.user || {};
 		const apiStats = apiData?.data?.stats || {};
 		const apiStreaks = apiData?.data?.streaks || {};
@@ -355,7 +369,7 @@
 	  }
 	}
 	console.log("[OTC] internalId = " + internalId);
-	await injectChallengersPage(internalId);
+    await injectChallengersPage(internalId);
 	waitForChallengersTabContainer();
 }
   runScript();
