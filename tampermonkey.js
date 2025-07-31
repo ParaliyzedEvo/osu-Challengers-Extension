@@ -3,8 +3,8 @@
 // @namespace    https://github.com/ParaliyzedEvo/osu-Challengers-Extension
 // @homepageURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension
 // @supportURL   https://github.com/ParaliyzedEvo/osu-Challengers-Extension/issues
-// @updateURL    https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/main.js
-// @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/main.js
+// @updateURL    https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
+// @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
 // @author       Paraliyzed_evo and Thunderbirdo
 // @icon         https://osu.ppy.sh/favicon.ico
 // @version      2.1.1
