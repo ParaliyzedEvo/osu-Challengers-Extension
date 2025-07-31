@@ -9,8 +9,7 @@
 // @icon         https://osu.ppy.sh/favicon.ico
 // @version      2.1.1
 // @description  Extension to view osu!Challenger stats on osu!Website.
-// @match        https://osu.ppy.sh/users/*
-// @match        https://osu.ppy.sh/u/*
+// @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
 // @connect      challengersnexus.com
 // @grant        GM.xmlHttpRequest

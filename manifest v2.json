@@ -17,8 +17,7 @@
   },
   "permissions": [
     "storage",
-    "https://osu.ppy.sh/users/*",
-    "https://osu.ppy.sh/u/*",
+    "https://osu.ppy.sh/*",
     "https://www.challengersnexus.com/*",
     "https://yqgqoxgykswytoswqpkj.supabase.co/*"
   ],
