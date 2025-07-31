@@ -143,9 +143,8 @@
 			  span.id !== 'inspector_user_tag' && !span.dataset.customApplied
 			);
 
-			if (!hasInspectorTag || validSpans.length === 0) return; // Wait until both exist
+			if (!hasInspectorTag || validSpans.length === 0) return;
 
-			// Choose the username span — assume it's the first matching one that’s not [Nina]
 			const usernameSpan = validSpans[0];
 			styleFn(usernameSpan);
 			usernameSpan.dataset.customApplied = 'true';
