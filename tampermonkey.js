@@ -262,9 +262,6 @@
 		  if (!profileExtra) return;
 
 		  const challengersTabHTML = `
-			<a class="page-mode__item ui-sortable-handle"
-			   data-page-id="challengers"
-			   href="#challengers">
 			  <span class="page-mode-link page-mode-link--profile-page page-mode-link--is-active">
 				<span class="fake-bold"
 					  data-content="Challengers"
@@ -272,7 +269,6 @@
 				  Challengers
 				</span>
 			  </span>
-			</a>
 		  `;
 
 		  if (profileExtra.querySelector('a[data-page-id="challengers"]')) return;
