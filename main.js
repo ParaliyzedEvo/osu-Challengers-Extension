@@ -18,7 +18,7 @@
 	  const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
 	  const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
 	  const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
-	  
+
 	  function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
 	  return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage(
@@ -268,7 +268,7 @@
 		  if (!profileExtra) return;
 
 		  const challengersTabHTML = `
-			<a class="page-mode__item js-sortable--tab ui-sortable-handle"
+			<a class="page-mode__item ui-sortable-handle"
 			   data-page-id="challengers"
 			   href="#challengers">
 			  <span class="page-mode-link page-mode-link--profile-page page-mode-link--is-active">
