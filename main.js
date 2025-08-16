@@ -317,7 +317,7 @@
 		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
 		const challengersHTML = `
-		<div class="js-sortable--page" data-page-id="challengers">
+		<div data-page-id="challengers">
 		  <div class="page-extra">
 			<div class="u-relative">
 			  <h2 class="title title--page-extra">Challengers!</h2>
