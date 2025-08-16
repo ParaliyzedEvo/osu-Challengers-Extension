@@ -7,7 +7,7 @@
 // @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
 // @author       Paraliyzed_evo and Thunderbirdo
 // @icon         https://osu.ppy.sh/favicon.ico
-// @version      2.1.2
+// @version      2.1.3
 // @description  Extension to view osu!Challenger stats on osu!Website.
 // @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
@@ -330,7 +330,7 @@
 		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
 		const challengersHTML = `
-		<div class="js-sortable--page" data-page-id="challengers">
+		<div data-page-id="challengers">
 		  <div class="page-extra">
 			<div class="u-relative">
 			  <h2 class="title title--page-extra">Challengers!</h2>
