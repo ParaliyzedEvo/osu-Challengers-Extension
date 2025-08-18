@@ -8,7 +8,7 @@ const port = 8000;
 const testOsuId = 19637339;
 
 const SUPABASE_URL = "https://yqgqoxgykswytoswqpkj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZ3FveGd5a3N3eXRvc3dxcGtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3MTkxNTEsImV4cCI6MjA2NDI5NTE1MX0.cIWfvz9dlSWwYy7QKSmWpEHc1KVzpB77VzB7TNhQ2ec";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 async function callRpc(name, params = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
