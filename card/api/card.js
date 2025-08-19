@@ -149,7 +149,7 @@ function convertAllTextToPaths($) {
   });
 }
 
-function generateSvg(profile, stats, streaks, leaderboard) {
+async function generateSvg(profile, stats, streaks, leaderboard) {
   const svg = fs.readFileSync(path.join(__dirname, "../main.svg"), "utf8");
   const $ = cheerio.load(svg, { xmlMode: true });
   const me = Array.isArray(leaderboard)
