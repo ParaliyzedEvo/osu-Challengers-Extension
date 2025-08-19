@@ -1,17 +1,18 @@
 {
-  "name": "osu!Challengers Card",
+  "name": "osu!Challengers-card",
   "version": "1.0.0",
   "description": "Dynamic SVG for osu!Challengers",
+  "keywords": [],
+  "license": "ISC",
+  "author": "Paraliyzed_evo",
+  "type": "module",
   "main": "card.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "Paraliyzed_evo",
-  "license": "ISC",
-  "type": "module",
   "dependencies": {
     "cheerio": "^1.1.2",
     "text-to-svg": "^3.1.5"
-  }
+  },
+  "devDependencies": {}
 }
