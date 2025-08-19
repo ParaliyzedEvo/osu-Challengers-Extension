@@ -1,20 +1,22 @@
 import fs from "fs";
 import * as cheerio from "cheerio";
 import TextToSVG from "text-to-svg";
+import dotenv from "dotenv";
 
-const port = 8000;
+dotenv.config({ path: ".env.local" });
+
 const testOsuId = 19637339;
-
 const SUPABASE_URL = "https://yqgqoxgykswytoswqpkj.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
+// Load fonts
 const fontRegular = TextToSVG.loadSync("Inter.ttf");
 let fontBold = fontRegular;
 try {
   fontBold = TextToSVG.loadSync("Inter.ttf");
-} catch (_) {
-}
+} catch (_) {}
 
+// Helper functions
 function pickFont(style) {
   const weight = (style["font-weight"] || "").toLowerCase();
   const spec = (style["-inkscape-font-specification"] || "").toLowerCase();
@@ -35,7 +37,6 @@ async function callRpc(name, params = {}) {
     },
     body: JSON.stringify(params),
   });
-
   if (!res.ok) throw new Error(`Supabase RPC failed: ${res.statusText}`);
   return res.json();
 }
@@ -99,45 +100,39 @@ function convertAllTextToPaths($) {
       if (!textContent) return;
       const fontSize = parseFloat(st["font-size"] || "16");
       const font = pickFont(st);
-		let { x, y } = coordsFor($node, $text);
-		y += 1.2;
-		const id = $text.attr("id") || "";
-		switch (id) {
-		  case "username":
-			x -= 5;
-			y -= 0.2;
-			break;
-		  case "current_streak":
-		    x += 3.3;
-			y += 3;
-			break;
-		  case "best_streak":
-		    x += 3.3;
-			y += 3;
-			break;
-		  case "text9":
-		    x += .1;
-			break;
-		  case "text74":
-		    x += .1;
-			break;
-		  case "text9-9":
-		    x += .7;
-			break;
-		  case "text73":
-		    x += .7;
-			break;
-		}
-		const metrics = font.getMetrics(textContent, { fontSize });
-		const width = metrics.width || 0;
-		const topY = y - (metrics.ascender || 0);
-		const startX = xWithAnchor(x, textAnchor, width);
-		const d = font.getD(textContent, {
-		  x: startX,
-		  y: topY,
-		  fontSize,
-		});
+
+      let { x, y } = coordsFor($node, $text);
+      y += 1.2;
+
+      const id = $text.attr("id") || "";
+      switch (id) {
+        case "username":
+          x -= 5;
+          y -= 0.2;
+          break;
+        case "current_streak":
+        case "best_streak":
+          x += 3.3;
+          y += 3;
+          break;
+        case "text9":
+        case "text74":
+          x += 0.1;
+          break;
+        case "text9-9":
+        case "text73":
+          x += 0.7;
+          break;
+      }
+
+      const metrics = font.getMetrics(textContent, { fontSize });
+      const width = metrics.width || 0;
+      const topY = y - (metrics.ascender || 0);
+      const startX = xWithAnchor(x, textAnchor, width);
+
+      const d = font.getD(textContent, { x: startX, y: topY, fontSize });
       const $path = $("<path/>").attr("d", d);
+
       if (st.fill) $path.attr("fill", st.fill);
       else $path.attr("fill", "black");
       if (st["fill-opacity"]) $path.attr("fill-opacity", st["fill-opacity"]);
@@ -150,6 +145,7 @@ function convertAllTextToPaths($) {
 
       $group.append($path);
     });
+
     $text.replaceWith($group);
   });
 }
@@ -169,11 +165,10 @@ function generateSvg(profile, stats, streaks, leaderboard) {
     $nameSpan.text(username);
     const ns = parseStyle($nameSpan.attr("style"));
     ns["font-size"] = `${newPx}px`;
-    const styleStr = Object.entries(ns)
-      .map(([k, v]) => `${k}:${v}`)
-      .join(";");
+    const styleStr = Object.entries(ns).map(([k, v]) => `${k}:${v}`).join(";");
     $nameSpan.attr("style", styleStr);
   }
+
   $("#pfp").attr("xlink:href", profile?.avatar_url ?? "https://paraliyzed.net/img/lara.png");
 
   const setText = (sel, val) => {
@@ -190,12 +185,12 @@ function generateSvg(profile, stats, streaks, leaderboard) {
   setText("#best_streak", streaks?.longestStreak ?? "-");
 
   convertAllTextToPaths($);
-
   return $.xml();
 }
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).send("Method not allowed");
+
   try {
     const osuId = req.query.id || String(testOsuId);
 
@@ -209,9 +204,7 @@ export default async function handler(req, res) {
         ? Object.values(rawInt).find((v) => typeof v === "number")
         : null;
 
-    if (!internalId) {
-      return res.status(404).send("User not found");
-    }
+    if (!internalId) return res.status(404).send("User not found");
 
     const profileRes = await fetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
     if (!profileRes.ok) throw new Error("Failed to fetch profile");
@@ -235,8 +228,4 @@ export default async function handler(req, res) {
     console.error(err);
     res.status(500).send("Error: " + err.message);
   }
-};
-
-app.listen(port, () => {
-  console.log(`SVG API running at http://localhost:${port}/api/card?id=${testOsuId}`);
-});
+}
