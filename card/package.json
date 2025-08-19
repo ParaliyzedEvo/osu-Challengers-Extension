@@ -7,7 +7,6 @@
   "author": "Paraliyzed_evo",
   "type": "module",
   "private": true,
-  "main": "api/card.js",
   "scripts": {
     "test": "node card_test.js"
   },

@@ -168,7 +168,36 @@ function generateSvg(profile, stats, streaks, leaderboard) {
     $nameSpan.attr("style", styleStr);
   }
 
-  $("#pfp").attr("xlink:href", profile?.avatar_url ?? "https://paraliyzed.net/img/lara.png");
+  async function getOsuAvatar(osuUsername) {
+    try {
+      const tokenRes = await fetch("https://osu.ppy.sh/oauth/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: process.env.OSU_CLIENT_ID,
+          client_secret: process.env.OSU_CLIENT_SECRET,
+          grant_type: "client_credentials",
+          scope: "public",
+        }),
+      });
+      if (!tokenRes.ok) throw new Error("Failed to get OAuth token");
+      const tokenData = await tokenRes.json();
+      const accessToken = tokenData.access_token;
+
+      const userRes = await fetch(`https://osu.ppy.sh/api/v2/users/${osuUsername}/osu`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userRes.ok) throw new Error("Failed to fetch osu user");
+      const userData = await userRes.json();
+      return userData.avatar_url;
+    } catch (err) {
+      console.error("Failed to fetch osu avatar:", err);
+      return profile?.avatar_url ?? "https://paraliyzed.net/img/lara.png";
+    }
+  }
+
+  const osuAvatar = await getOsuAvatar(profile?.username);
+  $("#pfp").attr("xlink:href", osuAvatar);
 
   const setText = (sel, val) => {
     const $t = $(`${sel} tspan`);
