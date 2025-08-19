@@ -2,7 +2,7 @@
   "name": "osu!Challengers Card",
   "version": "1.0.0",
   "description": "Dynamic SVG for osu!Challengers",
-  "main": "card.js",
+  "main": "card_local.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,6 +13,8 @@
   "dependencies": {
     "cheerio": "^1.1.2",
     "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2",
     "text-to-svg": "^3.1.5"
   }
 }
