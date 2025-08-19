@@ -1,11 +1,7 @@
 import fs from "fs";
 import * as cheerio from "cheerio";
 import TextToSVG from "text-to-svg";
-import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.local" });
-
-const testOsuId = 19637339;
 const SUPABASE_URL = "https://yqgqoxgykswytoswqpkj.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
