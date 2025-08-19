@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    input { padding: 0.5rem; width: 200px; margin-right: 1rem; }
+    button { padding: 0.5rem 1rem; }
+    .link-output { margin-top: 1rem; }
+    .error { color: red; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Card Generator</h1>
+  <input type="text" id="userId" placeholder="Enter User ID">
+  <button id="generateBtn">Generate</button>
+
+  <div class="link-output" id="linkOutput"></div>
+  <div class="error" id="errorOutput"></div>
+
+  <script>
+    const generateBtn = document.getElementById("generateBtn");
+    const userIdInput = document.getElementById("userId");
+    const linkOutput = document.getElementById("linkOutput");
+    const errorOutput = document.getElementById("errorOutput");
+
+    generateBtn.addEventListener("click", async () => {
+      const id = userIdInput.value.trim();
+      if (!id) return alert("Please enter a User ID");
+
+      const apiUrl = `https://api.paraliyzed.net/api/card?id=${encodeURIComponent(id)}`;
+
+      linkOutput.innerHTML = "";
+      errorOutput.textContent = "";
+
+      try {
+        const res = await fetch(apiUrl, { method: "GET" });
+
+        if (res.status === 404) {
+          errorOutput.textContent = "User not found (404)";
+          return;
+        }
+
+        if (!res.ok) {
+          errorOutput.textContent = `Error: ${res.status} ${res.statusText}`;
+          return;
+        }
+        linkOutput.innerHTML = `<a href="${apiUrl}" target="_blank">${apiUrl}</a>`;
+      } catch (err) {
+        errorOutput.textContent = "Network error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
