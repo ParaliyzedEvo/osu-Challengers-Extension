@@ -236,7 +236,7 @@ export default async function handler(req, res) {
     console.error(err);
     res.status(500).send("Error: " + err.message);
   }
-});
+};
 
 app.listen(port, () => {
   console.log(`SVG API running at http://localhost:${port}/api/card?id=${testOsuId}`);
