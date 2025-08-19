@@ -6,7 +6,7 @@
   "license": "ISC",
   "author": "Paraliyzed_evo",
   "type": "module",
-  "main": "card.js",
+  "private": true,
   "scripts": {
     "test": "node card_test.js"
   },
