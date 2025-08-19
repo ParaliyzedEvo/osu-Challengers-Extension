@@ -5,7 +5,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.1.1 start');
+	  console.log('[OTC] 🔥 v2.2.0 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -297,26 +297,6 @@
 	}
 
 	async function injectChallengersPage(internalId) {
-  function fetchChallengerData(internalId) {
-    return new Promise((resolve, reject) => {
-      GM.xmlHttpRequest({
-        method: 'GET',
-        url: `https://www.challengersnexus.com/api/user/profile/${internalId}`,
-        onload: function (response) {
-          try {
-            const data = JSON.parse(response.responseText);
-            resolve(data);
-          } catch (err) {
-            reject(`Invalid JSON: ${err}`);
-          }
-        },
-        onerror: function (err) {
-          reject(`Request failed: ${err}`);
-        }
-      });
-    });
-  }
-
   const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
   const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
   if (!userPages) return console.warn('Could not find user profile container.');
@@ -324,7 +304,7 @@
   const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
 
   try {
-    const apiData = await fetchChallengerData(internalId);
+    const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
     const apiUser = apiData?.data?.user || {};
     const apiStats = apiData?.data?.stats || {};
     const apiStreaks = apiData?.data?.streaks || {};
@@ -351,7 +331,7 @@
                   <div class="oc-challenger-block">
                     <div class="oc-challenger-container">
                       <div><a rel="nofollow" target="_blank" href="${svgUrl}">
-                    <img alt="" width="869" src="${svgUrl}" loading="lazy">
+                    <img alt="" width="869" height="auto" src="${svgUrl}" loading="lazy">
                   </a></div>
                     </div>
                   </div>
