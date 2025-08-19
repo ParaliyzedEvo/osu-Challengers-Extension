@@ -1,2 +1,2 @@
-svg/node_modules/*
-svg/.env.local
+api/node_modules/*
+api/.env.local
