@@ -7,7 +7,7 @@
 // @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
 // @author       Paraliyzed_evo and Thunderbirdo
 // @icon         https://osu.ppy.sh/favicon.ico
-// @version      2.1.3
+// @version      2.2.0
 // @description  Extension to view osu!Challenger stats on osu!Website.
 // @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
@@ -22,7 +22,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.1.2 start');
+	  console.log('[OTC] 🔥 v2.2.0 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -291,77 +291,108 @@
 	}
 
 	async function injectChallengersPage(internalId) {
-	  function fetchChallengerData(internalId) {
-	  return new Promise((resolve, reject) => {
-		GM.xmlHttpRequest({
-		  method: 'GET',
-		  url: `https://www.challengersnexus.com/api/user/profile/${internalId}`,
-		  onload: function (response) {
-			try {
-			  const data = JSON.parse(response.responseText);
-			  resolve(data);
-			} catch (err) {
-			  reject(`Invalid JSON: ${err}`);
-			}
-		  },
-		  onerror: function (err) {
-			reject(`Request failed: ${err}`);
-		  }
-		});
-	  });
-	}
-	  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
-	  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
-	  if (!userPages) return console.warn('Could not find user profile container.');
+  function fetchChallengerData(internalId) {
+    return new Promise((resolve, reject) => {
+      GM.xmlHttpRequest({
+        method: 'GET',
+        url: `https://www.challengersnexus.com/api/user/profile/${internalId}`,
+        onload: function (response) {
+          try {
+            const data = JSON.parse(response.responseText);
+            resolve(data);
+          } catch (err) {
+            reject(`Invalid JSON: ${err}`);
+          }
+        },
+        onerror: function (err) {
+          reject(`Request failed: ${err}`);
+        }
+      });
+    });
+  }
 
-	  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
+  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
+  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
+  if (!userPages) return console.warn('Could not find user profile container.');
 
-	  try {
-		// Api
-		const apiData = await fetchChallengerData(internalId);
-		const apiUser = apiData?.data?.user || {};
-		const apiStats = apiData?.data?.stats || {};
-		const apiStreaks = apiData?.data?.streaks || {};
-		if (!apiData) return console.warn('Invalid data from API.');
+  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
 
-		// Supabase
-		const me = board?.find(r => r.is_target_user) || {};
-		const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
-		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
+  try {
+    const apiData = await fetchChallengerData(internalId);
+    const apiUser = apiData?.data?.user || {};
+    const apiStats = apiData?.data?.stats || {};
+    const apiStreaks = apiData?.data?.streaks || {};
+    if (!apiData) return console.warn('Invalid data from API.');
 
-		const challengersHTML = `
-		<div data-page-id="challengers">
-		  <div class="page-extra">
-			<div class="u-relative">
-			  <h2 class="title title--page-extra">Challengers!</h2>
-			</div>
-			<div class="lazy-load">
-			  <div class="kudosu-box">
-				<div class="oc-challenger-block">
-				  <div class="oc-challenger-container">
-					<div class="oc-stat"><div class="oc-stat-label">Current Streak</div><div class="oc-stat-value">${apiStreaks.currentStreak ?? '-'}</div></div>
-					<div class="oc-stat"><div class="oc-stat-label">Best Streak</div><div class="oc-stat-value">${apiStreaks.longestStreak ?? '-'}</div></div>
-					<div class="oc-stat"><div class="oc-stat-label">Avg Acc</div><div class="oc-stat-value">${fmtPct(me.average_accuracy)}</div></div>
-					<div class="oc-stat"><div class="oc-stat-label">First Places</div><div class="oc-stat-value">${apiStats.firstPlaceCount ?? '-'}</div></div>
-				  </div>
-				  <div class="oc-challenger-container">
-					<div class="oc-stat"><div class="oc-stat-label">Seasonal Rank</div><div class="oc-stat-value">#${me.position ?? '-'}</div></div>
-					<div class="oc-stat"><div class="oc-stat-label">Top</div><div class="oc-stat-value">${fmtPct(100 - me.percentile)}</div></div>
-					<div class="oc-stat"><div class="oc-stat-label">Total Score</div><div class="oc-stat-value">${apiStats.totalScorePoints ?? '-'}</div></div>
-					<div class="oc-stat"><div class="oc-stat-label">Total Plays</div><div class="oc-stat-value">${apiStats.totalScores ?? '-'}</div></div>
-				  </div>
-				</div>
-			  </div>
-			  <div class="title title--page-extra-small">Top 3 Performances </div>
-			</div>
-		  </div>
-		</div>
-	  `;
-		userPages.insertAdjacentHTML('afterbegin', challengersHTML);
-	  } catch (err) {
-		console.error('Failed to inject Challengers page:', err);
-	  }
-	}
+    const me = board?.find(r => r.is_target_user) || {};
+    const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
+    const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
+
+    const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}`;
+
+    let challengersHTML = '';
+    try {
+      const resp = await fetch(svgUrl, { method: 'GET' });
+      if (resp.ok) {
+        challengersHTML = `
+          <div data-page-id="challengers">
+            <div class="page-extra">
+              <div class="u-relative">
+                <h2 class="title title--page-extra">Challengers!</h2>
+              </div>
+              <div class="lazy-load">
+                <div class="kudosu-box">
+                  <div class="oc-challenger-block">
+                    <div class="oc-challenger-container">
+                      <div><a rel="nofollow" target="_blank" href="${svgUrl}">
+                    <img alt="" width="869" src="${svgUrl}" loading="lazy">
+                  </a></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="title title--page-extra-small">Top 3 Performances</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else throw new Error('SVG not found');
+    } catch {
+      challengersHTML = `
+        <div data-page-id="challengers">
+          <div class="page-extra">
+            <div class="u-relative">
+              <h2 class="title title--page-extra">Challengers!</h2>
+            </div>
+            <div class="lazy-load">
+              <div class="kudosu-box">
+                <div class="oc-challenger-block">
+                  <div class="oc-challenger-container">
+                    <div class="oc-stat"><div class="oc-stat-label">Current Streak</div><div class="oc-stat-value">${apiStreaks.currentStreak ?? '-'}</div></div>
+                    <div class="oc-stat"><div class="oc-stat-label">Best Streak</div><div class="oc-stat-value">${apiStreaks.longestStreak ?? '-'}</div></div>
+                    <div class="oc-stat"><div class="oc-stat-label">Avg Acc</div><div class="oc-stat-value">${fmtPct(me.average_accuracy)}</div></div>
+                    <div class="oc-stat"><div class="oc-stat-label">First Places</div><div class="oc-stat-value">${apiStats.firstPlaceCount ?? '-'}</div></div>
+                  </div>
+                  <div class="oc-challenger-container">
+                    <div class="oc-stat"><div class="oc-stat-label">Seasonal Rank</div><div class="oc-stat-value">#${me.position ?? '-'}</div></div>
+                    <div class="oc-stat"><div class="oc-stat-label">Top</div><div class="oc-stat-value">${fmtPct(100 - me.percentile)}</div></div>
+                    <div class="oc-stat"><div class="oc-stat-label">Total Score</div><div class="oc-stat-value">${apiStats.totalScorePoints ?? '-'}</div></div>
+                    <div class="oc-stat"><div class="oc-stat-label">Total Plays</div><div class="oc-stat-value">${apiStats.totalScores ?? '-'}</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="title title--page-extra-small">Top 3 Performances</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    userPages.insertAdjacentHTML('afterbegin', challengersHTML);
+
+  } catch (err) {
+    console.error('Failed to inject Challengers page:', err);
+  }
+}
 	console.log("[OTC] internalId = " + internalId);
     await injectChallengersPage(internalId);
 	waitForChallengersTabContainer();
