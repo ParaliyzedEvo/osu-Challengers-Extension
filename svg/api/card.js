@@ -2,7 +2,6 @@ import fs from "fs";
 import * as cheerio from "cheerio";
 import TextToSVG from "text-to-svg";
 
-const app = express();
 const port = 8000;
 const testOsuId = 19637339;
 
