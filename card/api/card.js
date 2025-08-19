@@ -1,11 +1,16 @@
 import fs from "fs";
 import * as cheerio from "cheerio";
 import TextToSVG from "text-to-svg";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const SUPABASE_URL = "https://yqgqoxgykswytoswqpkj.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-const fontRegular = TextToSVG.loadSync("Inter.ttf");
+const fontRegular = TextToSVG.loadSync(path.join(__dirname, "../Inter.ttf"));
 let fontBold = fontRegular;
 try {
   fontBold = TextToSVG.loadSync("Inter.ttf");
@@ -145,7 +150,7 @@ function convertAllTextToPaths($) {
 }
 
 function generateSvg(profile, stats, streaks, leaderboard) {
-  const svg = fs.readFileSync("main.svg", "utf8");
+  const svg = fs.readFileSync(path.join(__dirname, "../main.svg"), "utf8");
   const $ = cheerio.load(svg, { xmlMode: true });
   const me = Array.isArray(leaderboard)
     ? leaderboard.find((r) => r && (r.is_target_user || r.is_target_user === true)) || {}
