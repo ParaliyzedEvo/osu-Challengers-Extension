@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/card", "destination": "/api/card" }
-  ]
-}
