@@ -253,7 +253,7 @@ export default async function handler(req, res) {
       season_id_param: SEASON_ID,
     });
 
-    const outSvg = generateSvg(profile, stats, streaks, leaderboard);
+    const outSvg = await generateSvg(profile, stats, streaks, leaderboard);
 
     res.setHeader("Content-Type", "image/svg+xml");
     res.setHeader("Cache-Control", "no-store");
