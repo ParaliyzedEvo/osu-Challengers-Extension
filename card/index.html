@@ -31,8 +31,24 @@
       font-family: "UniSansCapsBold", sans-serif;
       font-size: 48px;
       color: #ffffff;
-      margin: 1rem 0;
+      margin: 0.1rem 0;
     }
+	
+	h2 {
+	  font-family: "UniSansCapsThin", sans-serif;
+	  font-size: 24px;
+	  color: #ffffff;
+	  margin: 0.1rem 0;
+	}
+
+	h2 a {
+	  text-decoration: none;
+	  color: #c792ea;
+	}
+
+	h2 a:hover {
+	  color: rgb(38, 150, 255);
+	}
 
     input {
       font-family: "UniSansCapsThin", sans-serif;
@@ -89,16 +105,28 @@
       margin-bottom: 1rem;
     }
 
-    .card-container {
-      margin-top: 2rem;
-      text-align: center;
-    }
+    .cards-row {
+	  display: flex;
+	  justify-content: center;
+	  align-items: flex-start;
+	  gap: 2rem;
+	  margin-top: 2rem;
+	  flex-wrap: wrap; /* keeps it mobile-friendly */
+	}
+	
+	.card-label {
+	  font-family: "UniSansCapsBold", sans-serif;
+	  font-size: 20px;
+	  color: #ffffff;
+	  margin-bottom: 0.5rem;
+	}
 
-    .card-container img {
-      display: block;
-      margin: 0 auto 1rem;
-      max-width: 100%;
-    }
+	.card-container {
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;
+	  text-align: center;
+	}
 	
 	.card-container img {
 	  display: block;
@@ -113,24 +141,39 @@
 	  color: rgba(255, 255, 255, 0.5);
 	  background-color: #513f45;
 	  border: none;
-	  width: 400px;
-	  height: 50px;
+	  width: 727px;
+	  height: 40px;
 	  margin: 0.5rem auto 2rem;
 	  border-radius: 10px;
 	  cursor: pointer;
 	  display: flex;
 	  align-items: center;
-	  justify-content: space-evenly;
+	  justify-content: center;
 	  padding: 0 15px;
 	  box-sizing: border-box;
 	  white-space: nowrap;
 	  overflow: hidden;
 	  text-overflow: ellipsis;
+	  text-align: center;
 	}
 
     .copy-box:focus {
       outline: none;
     }
+	
+	.copy-group {
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;
+	}
+
+	.copy-group label {
+	  font-family: "UniSansCapsThin", sans-serif;
+	  font-size: 14px;
+	  color: rgba(255, 255, 255, 0.8);
+	  margin-bottom: 0.3rem;
+	  text-align: center;
+	}
   </style>
 </head>
 <body>
@@ -139,6 +182,7 @@
   </a>
 
   <h1>osu!Challengers Card Generator</h1>
+  <h2>Made by <a href="https://paraliyzed.net" target="_blank">Paraliyzed_evo</a></h2>
   <input type="text" id="userId" placeholder="Enter User ID">
   <button id="generateBtn">Generate</button>
 
@@ -156,6 +200,40 @@
         alert("Copied to clipboard: " + text);
       });
     }
+	
+	function generateCopyBoxes(url, userId, label) {
+	  const profileUrl = `https://osu.ppy.sh/users/${userId}`;
+	  return `
+		<div class="copy-group">
+		  <label>URL</label>
+		  <input class="copy-box" type="text" value="${url}" readonly onclick="copyToClipboard('${url}')">
+		</div>
+		<div class="copy-group">
+		  <label>Markdown (just image)</label>
+		  <input class="copy-box" type="text" value="![${label}](${url})" readonly onclick="copyToClipboard('![${label}](${url})')">
+		</div>
+		<div class="copy-group">
+		  <label>Markdown with link to osu! profile</label>
+		  <input class="copy-box" type="text" value="[![${label}](${url})](${profileUrl})" readonly onclick="copyToClipboard('[![${label}](${url})](${profileUrl})')">
+		</div>
+		<div class="copy-group">
+		  <label>BBCode (just image)</label>
+		  <input class="copy-box" type="text" value="[img]${url}[/img]" readonly onclick="copyToClipboard('[img]${url}[/img]')">
+		</div>
+		<div class="copy-group">
+		  <label>BBCode with link to osu! profile</label>
+		  <input class="copy-box" type="text" value="[url=${profileUrl}][img]${url}[/img][/url]" readonly onclick="copyToClipboard('[url=${profileUrl}][img]${url}[/img][/url]')">
+		</div>
+		<div class="copy-group">
+		  <label>HTML (just image)</label>
+		  <input class="copy-box" type="text" value="<img src='${url}' alt='${label}'>" readonly onclick="copyToClipboard('<img src=\'${url}\' alt=\'${label}\'>')">
+		</div>
+		<div class="copy-group">
+		  <label>HTML with link to osu! profile</label>
+		  <input class="copy-box" type="text" value="<a href='${profileUrl}'><img src='${url}' alt='${label}'></a>" readonly onclick="copyToClipboard('<a href=\'${profileUrl}\'><img src=\'${url}\' alt=\'${label}\'></a>')">
+		</div>
+	  `;
+	}
 
     generateBtn.addEventListener("click", async () => {
       const id = userIdInput.value.trim();
@@ -181,15 +259,19 @@
         }
 
         linkOutput.innerHTML = `
-          <div class="card-container">
-            <img src="${apiUrl}" alt="Main Card">
-            <input class="copy-box" type="text" value="${apiUrl}" readonly onclick="copyToClipboard('${apiUrl}')">
-          </div>
-          <div class="card-container">
-            <img id="mini" src="${apiUrlMini}" alt="Mini Card">
-            <input class="copy-box" type="text" value="${apiUrlMini}" readonly onclick="copyToClipboard('${apiUrlMini}')">
-          </div>
-        `;
+		  <div class="cards-row">
+			<div class="card-container">
+			  <div class="card-label">Full</div>
+			  <img src="${apiUrl}" alt="Main Card">
+			  ${generateCopyBoxes(apiUrl, id, "Main Card")}
+			</div>
+			<div class="card-container">
+			  <div class="card-label">Mini</div>
+			  <img id="mini" src="${apiUrlMini}" alt="Mini Card">
+			  ${generateCopyBoxes(apiUrlMini, id, "Mini Card")}
+			</div>
+		  </div>
+		`;
       } catch (err) {
         errorOutput.textContent = "Network error: " + err.message;
       }
