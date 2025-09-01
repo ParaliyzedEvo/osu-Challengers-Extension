@@ -86,7 +86,7 @@ function xWithAnchor(x, anchor, width) {
   return x;
 }
 
-function convertAllTextToPaths($) {
+function convertAllTextToPaths($, variant = "main") {
   $("text").each((_, el) => {
     const $text = $(el);
     const textStyle = parseStyle($text.attr("style"));
@@ -94,8 +94,10 @@ function convertAllTextToPaths($) {
     const $group = $("<g/>");
     if ($text.attr("id")) $group.attr("id", $text.attr("id"));
     if ($text.attr("transform")) $group.attr("transform", $text.attr("transform"));
+
     const tspans = $text.children("tspan");
     const targets = tspans.length ? tspans.toArray() : [el];
+
     targets.forEach((node) => {
       const $node = $(node);
       const nodeStyle = parseStyle($node.attr("style"));
@@ -103,46 +105,68 @@ function convertAllTextToPaths($) {
 
       const textContent = (tspans.length ? $node.text() : $text.text()) ?? "";
       if (!textContent) return;
+
       const fontSize = parseFloat(st["font-size"] || "16");
       const font = pickFont(st);
-		let { x, y } = coordsFor($node, $text);
-		y += 1.2;
-		const id = $text.attr("id") || "";
-		switch (id) {
-		  case "username":
-			x -= 5;
-			y -= 0.2;
-			break;
-		  case "current_streak":
-		    x += 3.3;
-			y += 3;
-			break;
-		  case "best_streak":
-		    x += 3.3;
-			y += 3;
-			break;
-		  case "text9":
-		    x += .1;
-			break;
-		  case "text74":
-		    x += .1;
-			break;
-		  case "text9-9":
-		    x += .7;
-			break;
-		  case "text73":
-		    x += .7;
-			break;
-		}
-		const metrics = font.getMetrics(textContent, { fontSize });
-		const width = metrics.width || 0;
-		const topY = y - (metrics.ascender || 0);
-		const startX = xWithAnchor(x, textAnchor, width);
-		const d = font.getD(textContent, {
-		  x: startX,
-		  y: topY,
-		  fontSize,
-		});
+      let { x, y } = coordsFor($node, $text);
+      y += 1.2;
+
+      const id = $text.attr("id") || "";
+      switch (id) {
+        case "username":
+          x -= 5;
+          y -= 0.2;
+          break;
+        case "current_streak":
+          x += 3.3;
+          y += 3;
+          if (variant === "mini") {
+            x += 2;
+          }
+          break;
+        case "best_streak":
+          x += 3.3;
+          y += 3;
+          if (variant === "mini") {
+            x += 2;
+          }
+          break;
+        case "text9":
+          x += 0.1;
+		  if (variant === "mini") {
+            x += 2;
+		  }
+          break;
+        case "text74":
+          x += 0.1;
+		  if (variant === "mini") {
+            x += 2;
+		  }
+          break;
+        case "text9-9":
+          x += 0.7;
+		  if (variant === "mini") {
+            x += 2;
+		  }
+          break;
+        case "text73":
+          x += 0.7;
+		  if (variant === "mini") {
+            x += 2;
+		  }
+          break;
+      }
+
+      const metrics = font.getMetrics(textContent, { fontSize });
+      const width = metrics.width || 0;
+      const topY = y - (metrics.ascender || 0);
+      const startX = xWithAnchor(x, textAnchor, width);
+      const d = font.getD(textContent, {
+        x: startX,
+        y: topY,
+        fontSize,
+      });
+
       const $path = $("<path/>").attr("d", d);
       if (st.fill) $path.attr("fill", st.fill);
       else $path.attr("fill", "black");
@@ -156,12 +180,13 @@ function convertAllTextToPaths($) {
 
       $group.append($path);
     });
+
     $text.replaceWith($group);
   });
 }
 
-async function generateSvg(profile, stats, streaks, leaderboard) {
-  const svg = fs.readFileSync("main.svg", "utf8");
+async function generateSvgGeneric(svgFile, profile, stats, streaks, leaderboard, variant = "main") {
+  const svg = fs.readFileSync(svgFile, "utf8");
   const $ = cheerio.load(svg, { xmlMode: true });
 
   const me = Array.isArray(leaderboard)
@@ -169,8 +194,8 @@ async function generateSvg(profile, stats, streaks, leaderboard) {
     : {};
 
   const $nameSpan = $("#username tspan");
-  const username = profile?.username ?? "name";
   if ($nameSpan.length) {
+    const username = profile?.username ?? "name";
     const basePx = parseFloat(parseStyle($nameSpan.attr("style"))["font-size"] || "16");
     const newPx = adjustFontSizePx(username, 14, basePx);
     $nameSpan.text(username);
@@ -182,36 +207,38 @@ async function generateSvg(profile, stats, streaks, leaderboard) {
     $nameSpan.attr("style", styleStr);
   }
 
-  async function getOsuAvatar(osuUsername) {
-    try {
-      const tokenRes = await fetch("https://osu.ppy.sh/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client_id: process.env.OSU_CLIENT_ID,
-          client_secret: process.env.OSU_CLIENT_SECRET,
-          grant_type: "client_credentials",
-          scope: "public",
-        }),
-      });
-      if (!tokenRes.ok) throw new Error("Failed to get OAuth token");
-      const tokenData = await tokenRes.json();
-      const accessToken = tokenData.access_token;
+  if ($("#pfp").length) {
+    async function getOsuAvatar(osuUsername) {
+      try {
+        const tokenRes = await fetch("https://osu.ppy.sh/oauth/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            client_id: process.env.OSU_CLIENT_ID,
+            client_secret: process.env.OSU_CLIENT_SECRET,
+            grant_type: "client_credentials",
+            scope: "public",
+          }),
+        });
+        if (!tokenRes.ok) throw new Error("Failed to get OAuth token");
+        const tokenData = await tokenRes.json();
+        const accessToken = tokenData.access_token;
 
-      const userRes = await fetch(`https://osu.ppy.sh/api/v2/users/${osuUsername}/osu`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!userRes.ok) throw new Error("Failed to fetch osu user");
-      const userData = await userRes.json();
-      return userData.avatar_url;
-    } catch (err) {
-      console.error("Failed to fetch osu avatar:", err);
-      return profile?.avatar_url ?? "https://paraliyzed.net/img/lara.png";
+        const userRes = await fetch(`https://osu.ppy.sh/api/v2/users/${osuUsername}/osu`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!userRes.ok) throw new Error("Failed to fetch osu user");
+        const userData = await userRes.json();
+        return userData.avatar_url;
+      } catch (err) {
+        console.error("Failed to fetch osu avatar:", err);
+        return profile?.avatar_url ?? "https://paraliyzed.net/img/lara.png";
+      }
     }
-  }
 
-  const osuAvatar = await getOsuAvatar(profile?.username);
-  $("#pfp").attr("xlink:href", osuAvatar);
+    const osuAvatar = await getOsuAvatar(profile?.username);
+    $("#pfp").attr("xlink:href", osuAvatar);
+  }
 
   const setText = (sel, val) => {
     const $t = $(`${sel} tspan`);
@@ -226,7 +253,7 @@ async function generateSvg(profile, stats, streaks, leaderboard) {
   setText("#current_streak", streaks?.currentStreak ?? "-");
   setText("#best_streak", streaks?.longestStreak ?? "-");
 
-  convertAllTextToPaths($);
+  convertAllTextToPaths($, variant);
 
   return $.xml();
 }
@@ -234,6 +261,7 @@ async function generateSvg(profile, stats, streaks, leaderboard) {
 app.get("/card", async (req, res) => {
   try {
     const osuId = req.query.id || String(testOsuId);
+    const option = req.query.option || "main";
 
     const rawInt = await callRpc("get_user_id_from_osu_id", { p_osu_id: osuId });
     const internalId =
@@ -249,7 +277,9 @@ app.get("/card", async (req, res) => {
       return res.status(404).send("User not found");
     }
 
-    const profileRes = await fetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
+    const profileRes = await fetch(
+      `https://www.challengersnexus.com/api/user/profile/${internalId}`
+    );
     if (!profileRes.ok) throw new Error("Failed to fetch profile");
     const profileData = await profileRes.json();
     const profile = profileData?.data?.user || {};
@@ -262,7 +292,16 @@ app.get("/card", async (req, res) => {
       season_id_param: SEASON_ID,
     });
 
-    const outSvg = await generateSvg(profile, stats, streaks, leaderboard);
+    const templateFile = option === "mini" ? "mini.svg" : "main.svg";
+
+    const outSvg = await generateSvgGeneric(
+	  templateFile,
+	  profile,
+	  stats,
+	  streaks,
+	  leaderboard,
+	  option
+	);
 
     res.setHeader("Content-Type", "image/svg+xml");
     res.setHeader("Cache-Control", "no-store");

@@ -7,7 +7,7 @@
 // @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
 // @author       Paraliyzed_evo and Thunderbirdo
 // @icon         https://osu.ppy.sh/favicon.ico
-// @version      2.2.0
+// @version      2.2.1
 // @description  Extension to view osu!Challenger stats on osu!Website.
 // @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
@@ -22,7 +22,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.2.0 start');
+	  console.log('[OTC] 🔥 v2.2.1 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -328,7 +328,7 @@
     const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
     const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
-    const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}`;
+    const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}&option=mini`;
 
     let challengersHTML = '';
     try {

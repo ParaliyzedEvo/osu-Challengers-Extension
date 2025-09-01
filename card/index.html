@@ -3,15 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <title>Card Generator</title>
+  <link rel="icon" href="https://paraliyzed.net/img/logo.jpg" type="image/jpeg">
   <style>
-    body { font-family: sans-serif; padding: 2rem; }
-    input { padding: 0.5rem; width: 200px; margin-right: 1rem; }
-    button { padding: 0.5rem 1rem; }
-    .link-output { margin-top: 1rem; }
-    .error { color: red; margin-top: 1rem; }
+    @font-face {
+      font-family: "UniSansCapsBold";
+      src: url("Uni Sans Heavy Caps.ttf") format("truetype");
+      font-weight: bold;
+    }
+    @font-face {
+      font-family: "UniSansCapsThin";
+      src: url("Uni Sans Thin Caps.ttf") format("truetype");
+      font-weight: normal;
+    }
+
+    body {
+      background-color: #39252b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-family: "UniSansCapsBold", sans-serif;
+      font-size: 24px;
+      color: #ffffff;
+      margin: 1rem 0;
+    }
+
+    input {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 36.4px;
+      line-height: 36.4px;
+      color: rgba(255, 255, 255, 0.5);
+      background-color: #513f45;
+      border: none;
+      width: 800px;
+      height: 112px;
+      padding: calc((112px - 36.4px) / 2) 20px;
+      box-sizing: border-box;
+      margin: 1rem 0;
+      text-align: left;
+      border-radius: 20px;
+    }
+
+    input::placeholder {
+      text-align: left;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    button {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 36.4px;
+      line-height: 36.4px;
+      color: rgba(255, 255, 255, 0.5);
+      background-color: #513f45;
+      border: none;
+      width: 280px;
+      height: 70px;
+      cursor: pointer;
+      margin: 1rem 0;
+      padding: calc((70px - 36.4px) / 2) calc((280px - 227.6px) / 2);
+      box-sizing: border-box;
+      text-align: center;
+      border-radius: 15px;
+    }
+
+    .link-output, .error {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .banner {
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .card-container {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .card-container img {
+      display: block;
+      margin: 0 auto 1rem;
+      max-width: 100%;
+    }
+
+    .copy-box {
+	  font-family: "UniSansCapsThin", sans-serif;
+	  font-size: 100%;
+	  color: rgba(255, 255, 255, 0.5);
+	  background-color: #513f45;
+	  border: none;
+	  width: 400px;
+	  height: 50px;
+	  margin: 0.5rem auto 2rem;
+	  border-radius: 10px;
+	  cursor: pointer;
+	  display: flex;
+	  align-items: center;
+	  justify-content: space-evenly;
+	  padding: 0 15px;
+	  box-sizing: border-box;
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	}
+
+    .copy-box:focus {
+      outline: none;
+    }
   </style>
 </head>
 <body>
+  <a href="https://discord.com/invite/rkURq6wVTU" target="_blank">
+    <img src="https://paraliyzed.net/img/horizontalbannerA.png" alt="Banner" class="banner">
+  </a>
+
   <h1>Card Generator</h1>
   <input type="text" id="userId" placeholder="Enter User ID">
   <button id="generateBtn">Generate</button>
@@ -25,11 +144,19 @@
     const linkOutput = document.getElementById("linkOutput");
     const errorOutput = document.getElementById("errorOutput");
 
+    // Function: Copy link to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copied to clipboard: " + text);
+      });
+    }
+
     generateBtn.addEventListener("click", async () => {
       const id = userIdInput.value.trim();
       if (!id) return alert("Please enter a User ID");
 
       const apiUrl = `https://api.paraliyzed.net/api/card?id=${encodeURIComponent(id)}`;
+      const apiUrlMini = `https://api.paraliyzed.net/api/card?id=${encodeURIComponent(id)}&option=mini`;
 
       linkOutput.innerHTML = "";
       errorOutput.textContent = "";
@@ -46,7 +173,18 @@
           errorOutput.textContent = `Error: ${res.status} ${res.statusText}`;
           return;
         }
-        linkOutput.innerHTML = `<a href="${apiUrl}" target="_blank">${apiUrl}</a>`;
+
+        // Show SVGs + copyable text boxes
+        linkOutput.innerHTML = `
+          <div class="card-container">
+            <img src="${apiUrl}" alt="Main Card">
+            <input class="copy-box" type="text" value="${apiUrl}" readonly onclick="copyToClipboard('${apiUrl}')">
+          </div>
+          <div class="card-container">
+            <img src="${apiUrlMini}" alt="Mini Card">
+            <input class="copy-box" type="text" value="${apiUrlMini}" readonly onclick="copyToClipboard('${apiUrlMini}')">
+          </div>
+        `;
       } catch (err) {
         errorOutput.textContent = "Network error: " + err.message;
       }

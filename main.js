@@ -314,7 +314,7 @@
     const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
     const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
-    const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}`;
+    const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}&option=mini`;
 
     let challengersHTML = '';
     try {
