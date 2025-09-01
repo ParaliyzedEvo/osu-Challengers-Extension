@@ -144,7 +144,6 @@
     const linkOutput = document.getElementById("linkOutput");
     const errorOutput = document.getElementById("errorOutput");
 
-    // Function: Copy link to clipboard
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
         alert("Copied to clipboard: " + text);
@@ -174,7 +173,6 @@
           return;
         }
 
-        // Show SVGs + copyable text boxes
         linkOutput.innerHTML = `
           <div class="card-container">
             <img src="${apiUrl}" alt="Main Card">
