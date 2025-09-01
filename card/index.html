@@ -242,10 +242,6 @@
   <div class="error" id="errorOutput"></div>
 
   <script>
-    import { inject } from "@vercel/analytics"
-	import { injectSpeedInsights } from '@vercel/speed-insights';
-	injectSpeedInsights();
-	inject();
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
