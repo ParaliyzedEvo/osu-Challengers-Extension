@@ -119,10 +119,10 @@ function convertAllTextToPaths($, variant = "main") {
           }
           break;
         case "best_streak":
-          x += 3.3;
+          x += 3.5;
           y += 3;
           if (variant === "mini") {
-            x += 2.5;
+            x += 2.3;
           }
           break;
         case "text9":
