@@ -209,32 +209,52 @@ async function generateSvgGeneric(svgFile, profile, stats, streaks, leaderboard,
 
   if ($("#pfp").length) {
     async function getOsuAvatar(osuUsername) {
-      try {
-        const tokenRes = await fetch("https://osu.ppy.sh/oauth/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            client_id: process.env.OSU_CLIENT_ID,
-            client_secret: process.env.OSU_CLIENT_SECRET,
-            grant_type: "client_credentials",
-            scope: "public",
-          }),
-        });
-        if (!tokenRes.ok) throw new Error("Failed to get OAuth token");
-        const tokenData = await tokenRes.json();
-        const accessToken = tokenData.access_token;
+	  try {
+		const tokenRes = await fetch("https://osu.ppy.sh/oauth/token", {
+		  method: "POST",
+		  headers: { "Content-Type": "application/json" },
+		  body: JSON.stringify({
+			client_id: process.env.OSU_CLIENT_ID,
+			client_secret: process.env.OSU_CLIENT_SECRET,
+			grant_type: "client_credentials",
+			scope: "public",
+		  }),
+		});
+		if (!tokenRes.ok) throw new Error("Failed to get OAuth token");
+		const tokenData = await tokenRes.json();
+		const accessToken = tokenData.access_token;
 
-        const userRes = await fetch(`https://osu.ppy.sh/api/v2/users/${osuUsername}/osu`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!userRes.ok) throw new Error("Failed to fetch osu user");
-        const userData = await userRes.json();
-        return userData.avatar_url;
-      } catch (err) {
-        console.error("Failed to fetch osu avatar:", err);
-        return profile?.avatar_url ?? "https://paraliyzed.net/img/lara.png";
-      }
-    }
+		const userRes = await fetch(`https://osu.ppy.sh/api/v2/users/${osuUsername}/osu`, {
+		  headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		if (!userRes.ok) throw new Error("Failed to fetch osu user");
+		const userData = await userRes.json();
+
+		const avatarUrl = userData.avatar_url;
+
+		const imgRes = await fetch(avatarUrl);
+		if (!imgRes.ok) throw new Error("Failed to fetch avatar image");
+		const arrayBuffer = await imgRes.arrayBuffer();
+		const buffer = Buffer.from(arrayBuffer);
+
+		const contentType = imgRes.headers.get("content-type") || "image/png";
+
+		const base64 = buffer.toString("base64");
+		return `data:${contentType};base64,${base64}`;
+	  } catch (err) {
+		console.error("Failed to fetch osu avatar:", err);
+
+		try {
+		  const fallbackRes = await fetch("https://paraliyzed.net/img/lara.png");
+		  const arrBuf = await fallbackRes.arrayBuffer();
+		  const buf = Buffer.from(arrBuf);
+		  const base64 = buf.toString("base64");
+		  return `data:image/png;base64,${base64}`;
+		} catch {
+		  return null;
+		}
+	  }
+	}
 
     const osuAvatar = await getOsuAvatar(profile?.username);
     $("#pfp").attr("xlink:href", osuAvatar);
