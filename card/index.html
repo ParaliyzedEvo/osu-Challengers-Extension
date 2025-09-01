@@ -99,6 +99,20 @@
       margin: 0 auto 1rem;
       max-width: 100%;
     }
+	
+	.card-container img {
+	  display: block;
+	  margin: 0 auto 1rem;
+	  height: 100px;
+	  width: auto;
+	}
+	
+	#mini {
+	  display: block;
+	  margin: 0 auto 1rem;
+	  height: 150px;
+	  width: auto;
+	}
 
     .copy-box {
 	  font-family: "UniSansCapsThin", sans-serif;
@@ -179,7 +193,7 @@
             <input class="copy-box" type="text" value="${apiUrl}" readonly onclick="copyToClipboard('${apiUrl}')">
           </div>
           <div class="card-container">
-            <img src="${apiUrlMini}" alt="Mini Card">
+            <img id="mini" src="${apiUrlMini}" alt="Mini Card">
             <input class="copy-box" type="text" value="${apiUrlMini}" readonly onclick="copyToClipboard('${apiUrlMini}')">
           </div>
         `;
