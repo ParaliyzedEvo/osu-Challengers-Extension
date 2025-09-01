@@ -226,6 +226,8 @@
     }
   </style>
 </head>
+<script defer src="https://cdn.vercel-insights.com/v1/script.debug.js"></script>
+<script defer src="https://cdn.vercel-scripts.com/speed-insights/script.js"></script>
 <body>
   <div class="toast-container" id="toastContainer"></div>
   <a href="https://discord.com/invite/rkURq6wVTU" target="_blank">
@@ -240,6 +242,10 @@
   <div class="error" id="errorOutput"></div>
 
   <script>
+    import { inject } from "@vercel/analytics"
+	import { injectSpeedInsights } from '@vercel/speed-insights';
+	injectSpeedInsights();
+	inject();
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
