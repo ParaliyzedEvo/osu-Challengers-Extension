@@ -122,7 +122,7 @@ function convertAllTextToPaths($, variant = "main") {
           x += 3.3;
           y += 3;
           if (variant === "mini") {
-            x += 2;
+            x += 2.5;
           }
           break;
         case "text9":
