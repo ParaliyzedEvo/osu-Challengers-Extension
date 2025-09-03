@@ -14,18 +14,15 @@ const SUPABASE_URL = "https://yqgqoxgykswytoswqpkj.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 const fontRegular = TextToSVG.loadSync("Inter.ttf");
-let fontBold = fontRegular;
-try {
-  fontBold = TextToSVG.loadSync("Inter.ttf");
-} catch (_) {
-	// ok
-}
+const fontBold = TextToSVG.loadSync("Inter-Bold.ttf");
+const fontExtraBold = TextToSVG.loadSync("Inter-ExtraBold.ttf");
 
-function pickFont(style) {
-  const weight = (style["font-weight"] || "").toLowerCase();
-  const spec = (style["-inkscape-font-specification"] || "").toLowerCase();
-  if (weight.includes("bold") || weight === "700" || spec.includes("bold")) {
-    return fontBold || fontRegular;
+function pickFontById(id) {
+  if (["username", "current_streak", "best_streak"].includes(id)) {
+    return fontBold;
+  }
+  if (["total_score", "avg_acc", "rank", "plays", "top1", "top", "text9", "text74", "text9-9", "text73"].includes(id)) {
+    return fontExtraBold;
   }
   return fontRegular;
 }
@@ -107,11 +104,11 @@ function convertAllTextToPaths($, variant = "main") {
       if (!textContent) return;
 
       const fontSize = parseFloat(st["font-size"] || "16");
-      const font = pickFont(st);
       let { x, y } = coordsFor($node, $text);
       y += 1.2;
 
       const id = $text.attr("id") || "";
+      const font = pickFontById(id) || fontRegular;
       switch (id) {
         case "username":
           x -= 5;
