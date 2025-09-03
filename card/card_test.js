@@ -18,10 +18,10 @@ const fontBold = TextToSVG.loadSync("Inter-Bold.ttf");
 const fontExtraBold = TextToSVG.loadSync("Inter-ExtraBold.ttf");
 
 function pickFontById(id) {
-  if (["username", "current_streak", "best_streak"].includes(id)) {
+  if (["username", "current_streak", "best_streak", "text9", "text74", "text9-9", "text73", "text85"].includes(id)) {
     return fontBold;
   }
-  if (["total_score", "avg_acc", "rank", "plays", "top1", "top", "text9", "text74", "text9-9", "text73"].includes(id)) {
+  if (["total_score", "avg_acc", "rank", "plays", "top1", "top"].includes(id)) {
     return fontExtraBold;
   }
   return fontRegular;
