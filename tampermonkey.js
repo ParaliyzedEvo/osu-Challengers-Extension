@@ -332,7 +332,20 @@
 	  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
 	  
 	  try {
-		const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
+		const apiData = await new Promise((resolve, reject) => {
+			GM.xmlHttpRequest({
+				method: "GET",
+				url: `https://www.challengersnexus.com/api/user/profile/${internalId}`,
+				onload: (response) => {
+					try {
+						resolve(JSON.parse(response.responseText));
+					} catch (e) {
+						reject(e);
+					}
+				},
+				onerror: reject,
+			});
+		});
 		const apiUser = apiData?.data?.user || {};
 		const apiStats = apiData?.data?.stats || {};
 		const apiStreaks = apiData?.data?.streaks || {};
@@ -368,19 +381,20 @@
 		  return new Promise(async (resolve, reject) => {
 			try {
 			  console.log('Fetching SVG from:', svgSourceUrl);
-			  const svgText = await new Promise((resolveMsg, rejectMsg) => {
-				chrome.runtime.sendMessage(
-				  { type: 'fetch', url: svgSourceUrl, method: 'GET', headers: {}, body: null },
-				  (response) => {
-					if (chrome.runtime.lastError) return rejectMsg(chrome.runtime.lastError.message);
-					if (!response || typeof response.data !== 'string') {
-					  console.error('[OTC] ❌ Invalid response from background:', response);
-					  return rejectMsg('Invalid background response');
+			  const svgText = await new Promise((resolveFetch, rejectFetch) => {
+				GM.xmlHttpRequest({
+				method: 'GET',
+				url: svgSourceUrl,
+				onload: (response) => {
+					if (response.status >= 200 && response.status < 300) {
+					resolveFetch(response.responseText);
+					} else {
+					rejectFetch(`HTTP error: ${response.status}`);
 					}
-					resolveMsg(response.data);
-				  }
-				);
-			  });
+				},
+				onerror: (err) => rejectFetch(err),
+				});
+			});
 			  
 			  console.log('SVG fetch successful, length:', svgText?.length);
 			  
