@@ -10,9 +10,9 @@ const __dirname = path.dirname(__filename);
 const SUPABASE_URL = "https://yqgqoxgykswytoswqpkj.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-const fontRegular = TextToSVG.loadSync("Inter.ttf");
-const fontBold = TextToSVG.loadSync("Inter-Bold.ttf");
-const fontExtraBold = TextToSVG.loadSync("Inter-ExtraBold.ttf");
+const fontRegular = TextToSVG.loadSync(path.join(__dirname, "../Inter.ttf"));
+const fontBold = TextToSVG.loadSync(path.join(__dirname, "../Inter-Bold.ttf"));
+const fontExtraBold = TextToSVG.loadSync(path.join(__dirname, "../Inter-ExtraBold.ttf"));
 
 function pickFontById(id) {
   if (["username", "current_streak", "best_streak", "text9", "text74", "text9-9", "text73"].includes(id)) {
