@@ -12,6 +12,7 @@
 // @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
 // @connect      challengersnexus.com
+// @connect      paraliyzed.net
 // @grant        GM.xmlHttpRequest
 // ==/UserScript==
 
@@ -58,7 +59,7 @@
 		width: 100%;
 		height: 100%;
 	  }
-	  
+
 	  .kudosu-box {
 	    display: flex;
 	    justify-content: center;
@@ -66,7 +67,7 @@
 	    width: 900px;
 	    height: 100px;
 	  }
-	  
+
 	  .oc-stat {
 		display: flex;
 		flex-direction: column;
@@ -328,9 +329,9 @@
 	  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
 	  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
 	  if (!userPages) return console.warn('Could not find user profile container.');
-	  
+
 	  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
-	  
+
 	  try {
 		const apiData = await new Promise((resolve, reject) => {
 			GM.xmlHttpRequest({
@@ -395,9 +396,9 @@
 				onerror: (err) => rejectFetch(err),
 				});
 			});
-			  
+
 			  console.log('SVG fetch successful, length:', svgText?.length);
-			  
+
 			  if (!svgText || typeof svgText !== 'string') {
 				throw new Error('Invalid SVG response');
 			  }
@@ -406,7 +407,7 @@
 			  tempDiv.style.left = '-9999px';
 			  tempDiv.innerHTML = svgText;
 			  document.body.appendChild(tempDiv);
-			  
+
 			  const svgElement = tempDiv.querySelector('svg');
 			  if (!svgElement) {
 				document.body.removeChild(tempDiv);
@@ -415,7 +416,7 @@
 			  }
 			  const svgWidth = parseFloat(svgElement.getAttribute('width')) || maxWidth;
 			  const svgHeight = parseFloat(svgElement.getAttribute('height')) || (svgWidth * 0.3);
-			  
+
 			  console.log('SVG dimensions:', svgWidth, 'x', svgHeight);
 			  const canvas = document.createElement('canvas');
 			  const ctx = canvas.getContext('2d');
@@ -424,11 +425,11 @@
 			  canvas.height = svgHeight * dpr;
 			  canvas.style.width = `${Math.min(svgWidth, maxWidth)}px`;
 			  canvas.style.height = `${svgHeight * (Math.min(svgWidth, maxWidth) / svgWidth)}px`;
-			  
+
 			  ctx.scale(dpr, dpr);
 			  const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
 			  const svgDataUrl = URL.createObjectURL(svgBlob);
-			  
+
 			  const img = new Image();
 			  img.onload = () => {
 				console.log('SVG image loaded successfully');
@@ -444,7 +445,7 @@
 				reject(new Error('Failed to load SVG as image'));
 			  };
 			  img.src = svgDataUrl;
-			  
+
 			} catch (error) {
 			  console.error('SVG to canvas error:', error);
 			  reject(error);
@@ -462,13 +463,13 @@
 				transform: none !important;
 				backface-visibility: visible !important;
 			  `;
-			
+
 			const link = document.createElement('a');
 			link.rel = 'nofollow';
 			link.target = '_blank';
 			link.href = `https://www.challengersnexus.com/profile/${internalId}`;
 			link.appendChild(canvas);
-			
+
 			svgContainer.appendChild(link);
 		  }
 		} catch (svgError) {
