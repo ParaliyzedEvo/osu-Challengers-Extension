@@ -1,4 +1,6 @@
 ## osu!Challengers Github Repository
+[![CodeFactor](https://www.codefactor.io/repository/github/paraliyzedevo/osu-Challengers-Extension/badge)](https://www.codefactor.io/repository/github/paraliyzedevo/osu-Challengers-Extension)
+[![Website](https://img.shields.io/badge/-Website-6a0dad?style=flat&logo=osu&logoColor=FFFFFF&labelColor=ff1493&color=6a0dad)](https://api.paraliyzed.net/)
 
 Basically this repo is the dynamic image generator seen [here](api.paraliyzed.net) and this also includes the web extension I've been working on and will be released in the chrome and firefox store soon. For now js use the [tampermonkey.js](https://github.com/ParaliyzedEvo/osu-Challengers-Extension/blob/main/tampermonkey.js) and install it via tampermonkey.
 
