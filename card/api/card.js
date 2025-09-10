@@ -190,7 +190,7 @@ async function generateSvgGeneric(svgFile, profile, stats, streaks, leaderboard,
   if ($nameSpan.length) {
     const username = profile?.username ?? "name";
     const basePx = parseFloat(parseStyle($nameSpan.attr("style"))["font-size"] || "16");
-    const newPx = adjustFontSizePx(username, 14, basePx);
+    const newPx = adjustFontSizePx(username, 13, basePx);
     $nameSpan.text(username);
     const ns = parseStyle($nameSpan.attr("style"));
     ns["font-size"] = `${newPx}px`;
