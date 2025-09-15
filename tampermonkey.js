@@ -657,7 +657,7 @@
 				return;
 			}
 			const displayWidth = 727;
-			const displayHeight = 130;
+			const c = 110;
 
 			console.log('Display dimensions:', displayWidth, 'x', displayHeight);
 
