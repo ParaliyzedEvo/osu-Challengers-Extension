@@ -7,7 +7,7 @@
 // @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
 // @author       Paraliyzed_evo and Thunderbirdo
 // @icon         https://osu.ppy.sh/favicon.ico
-// @version      2.2.3
+// @version      2.3.3
 // @description  Extension to view osu!Challenger stats on osu!Website.
 // @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
@@ -23,7 +23,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.2.3 start');
+	  console.log('[OTC] 🔥 v2.3.3 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -358,26 +358,268 @@
 
 		const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}&option=mini`;
 		let challengersHTML = `
-		  <div data-page-id="challengers">
+		<div data-page-id="challengers">
 			<div class="page-extra">
-			  <div class="u-relative">
+			<div class="u-relative">
 				<h2 class="title title--page-extra">Challengers!</h2>
-			  </div>
-			  <div class="lazy-load">
+			</div>
+			<div class="lazy-load">
 				<div class="kudosu-box">
-				  <div class="oc-challenger-block">
+				<div class="oc-challenger-block">
 					<div class="oc-challenger-container">
-					  <div id="svg-container" style="max-width: 727px; overflow: hidden;">
-					  </div>
+					<div id="svg-container" style="max-width: 727px; overflow: hidden;">
 					</div>
-				  </div>
+					</div>
+				</div>
 				</div>
 				<div class="title title--page-extra-small">Top 3 Performances</div>
-			  </div>
+				<div id="top-performances"></div>
 			</div>
-		  </div>
+			</div>
+		</div>
 		`;
 		userPages.insertAdjacentHTML('afterbegin', challengersHTML);
+		function getRank(acc) {
+		if (acc === 100) return "SS";
+		if (acc >= 95) return "S";
+		if (acc >= 90) return "A";
+		if (acc >= 80) return "B";
+		if (acc >= 70) return "C";
+		return "D";
+		}
+
+		function renderMods(mods) {
+		if (!mods || !mods.length) return "";
+		const modTypes = {
+		// Difficulty Reduction
+		'EZ': 'DifficultyReduction',
+		'NF': 'DifficultyReduction',
+		'HT': 'DifficultyReduction',
+		'DC': 'DifficultyReduction',
+		'NR': 'DifficultyReduction',
+
+		// Difficulty Increase
+		'HR': 'DifficultyIncrease',
+		'SD': 'DifficultyIncrease',
+		'PF': 'DifficultyIncrease',
+		'DT': 'DifficultyIncrease',
+		'NC': 'DifficultyIncrease',
+		'FI': 'DifficultyIncrease',
+		'HD': 'DifficultyIncrease',
+		'CO': 'DifficultyIncrease',
+		'FL': 'DifficultyIncrease',
+		'BL': 'DifficultyIncrease',
+		'ST': 'DifficultyIncrease',
+		'AC': 'DifficultyIncrease',
+
+		// Automation
+		'AT': 'Automation',
+		'CN': 'Automation',
+		'RX': 'Automation',
+		'AP': 'Automation',
+		'SO': 'Automation',
+
+		// Conversion
+		'TP': 'Conversion',
+		'DA': 'Conversion',
+		'CL': 'Conversion',
+		'RD': 'Conversion',
+		'MR': 'Conversion',
+		'AL': 'Conversion',
+		'SW': 'Conversion',
+		'SG': 'Conversion',
+		'IN': 'Conversion',
+		'CS': 'Conversion',
+		'HO': 'Conversion',
+		'1K': 'Conversion',
+		'2K': 'Conversion',
+		'3K': 'Conversion',
+		'4K': 'Conversion',
+		'5K': 'Conversion',
+		'6K': 'Conversion',
+		'7K': 'Conversion',
+		'8K': 'Conversion',
+		'9K': 'Conversion',
+		'10K': 'Conversion',
+
+		// Fun
+		'TR': 'Fun',
+		'WG': 'Fun',
+		'SI': 'Fun',
+		'GR': 'Fun',
+		'DF': 'Fun',
+		'WU': 'Fun',
+		'WD': 'Fun',
+		'TC': 'Fun',
+		'BR': 'Fun',
+		'AD': 'Fun',
+		'FF': 'Fun',
+		'MU': 'Fun',
+		'NS': 'Fun',
+		'MG': 'Fun',
+		'RP': 'Fun',
+		'AS': 'Fun',
+		'FR': 'Fun',
+		'BU': 'Fun',
+		'SY': 'Fun',
+		'DP': 'Fun',
+		'BM': 'Fun',
+
+		// System
+		'SV2': 'System',
+		'TD': 'System',
+		};
+
+		const modNames = {
+		// Difficulty Reduction
+		'EZ': 'Easy',
+		'NF': 'No Fail',
+		'HT': 'Half Time',
+		'DC': 'Daycore',
+		'NR': 'No Release',
+
+		// Difficulty Increase
+		'HR': 'Hard Rock',
+		'SD': 'Sudden Death',
+		'PF': 'Perfect',
+		'DT': 'Double Time',
+		'NC': 'Nightcore',
+		'FI': 'Fade In',
+		'HD': 'Hidden',
+		'CO': 'Cover',
+		'FL': 'Flashlight',
+		'BL': 'Blinds',
+		'ST': 'Strict Tracking',
+		'AC': 'Accuracy Challenge',
+
+		// Automation
+		'AT': 'Autoplay',
+		'CN': 'Cinema',
+		'RX': 'Relax',
+		'AP': 'Autopilot',
+		'SO': 'Spun Out',
+
+		// Conversion
+		'TP': 'Target Practice',
+		'DA': 'Difficulty Adjust',
+		'CL': 'Classic',
+		'RD': 'Random',
+		'MR': 'Mirror',
+		'AL': 'Alternate',
+		'SW': 'Swap',
+		'SG': 'Single Tap',
+		'IN': 'Invert',
+		'CS': 'Constant Speed',
+		'HO': 'Hold Off',
+		'1K': '1 Key',
+		'2K': '2 Keys',
+		'3K': '3 Keys',
+		'4K': '4 Keys',
+		'5K': '5 Keys',
+		'6K': '6 Keys',
+		'7K': '7 Keys',
+		'8K': '8 Keys',
+		'9K': '9 Keys',
+		'10K': '10 Keys',
+
+		// Fun
+		'TR': 'Transform',
+		'WG': 'Wiggle',
+		'SI': 'Spin In',
+		'GR': 'Grow',
+		'DF': 'Deflate',
+		'WU': 'Wind Up',
+		'WD': 'Wind Down',
+		'TC': 'Traceable',
+		'BR': 'Barrel Roll',
+		'AD': 'Approach Different',
+		'FF': 'Floating Fruits',
+		'MU': 'Muted',
+		'NS': 'No Scope',
+		'MG': 'Magnetised',
+		'RP': 'Repel',
+		'AS': 'Adaptive Speed',
+		'FR': 'Freeze Frame',
+		'BU': 'Bubbles',
+		'SY': 'Synesthesia',
+		'DP': 'Depth',
+		'BM': 'Bloom',
+
+		// System
+		'SV2': 'Score V2',
+		'TD': 'Touch Device',
+		};
+		
+		return mods.map(mod => {
+			const acronym = mod.acronym;
+			const modType = modTypes[acronym] || 'Conversion';
+			const modName = modNames[acronym] || acronym;
+			
+			return `<div class="mod mod--type-${modType}" data-orig-title="${modName}" data-hasqtip="8" aria-describedby="qtip-8">
+					<div class="mod__icon mod__icon--${acronym}" data-acronym="${acronym}"></div>
+					</div>`;
+		}).join("");
+		}
+
+		try {
+		const scores = apiData?.data?.scores || [];
+		if (scores.length) {
+			// sort by placement, then by score
+			const sortedScores = scores.sort((a, b) => {
+			if (a.calculated_rank !== b.calculated_rank) {
+				return a.calculated_rank - b.calculated_rank; // lower placement first
+			}
+			return b.score - a.score; // then highest score
+			});
+			const topThree = sortedScores.slice(0, 3);
+			const container = document.getElementById("top-performances");
+
+			topThree.forEach(score => {
+			const rank = getRank(score.accuracy);
+			const mapTitle = score.playlists?.beatmap_title || "Unknown";
+			const mapArtist = score.playlists?.beatmap_artist || "Unknown";
+			const mapDiff = score.playlists?.beatmap_version || "";
+			const acc = score.accuracy.toFixed(2) + "%";
+			const mods = renderMods(score.mods_detailed);
+			const placement = score.calculated_rank;
+
+			const html = `
+				<div class="play-detail play-detail--highlightable play-detail--pin-sortable">
+				<div class="play-detail__group play-detail__group--top">
+					<div class="play-detail__icon play-detail__icon--main">
+					<div class="score-rank score-rank--full score-rank--${rank}"></div>
+					</div>
+					<div class="play-detail__detail">
+					<a class="play-detail__title u-ellipsis-overflow" href="https://osu.ppy.sh/beatmaps/${score.playlists?.beatmap_id || ''}">
+						${mapTitle} <small class="play-detail__artist">by ${mapArtist}</small>
+					</a>
+					<div class="play-detail__beatmap-and-time">
+						<span class="play-detail__beatmap">${mapDiff}</span>
+						<span class="play-detail__time"><time datetime="${score.submitted_at}">${new Date(score.submitted_at).toLocaleDateString()}</time></span>
+					</div>
+					</div>
+				</div>
+				<div class="play-detail__group play-detail__group--bottom">
+					<div class="play-detail__score-detail play-detail__score-detail--score">
+					<div class="play-detail__score-detail-top-right">
+						<div class="play-detail__accuracy-and-weighted-pp">
+						<span class="play-detail__accuracy">${acc}</span>
+						</div>
+					</div>
+					</div>
+					<div class="play-detail__score-detail play-detail__score-detail--mods">
+					${mods}
+					</div>
+					<div class="play-detail__pp"><span>Rank #${placement}</span></div>
+				</div>
+				</div>
+			`;
+			container.innerHTML += html;
+			});
+		}
+		} catch (err) {
+		console.error("Failed to render Top 3 performances:", err);
+		}
 		async function svgToCanvas(svgSourceUrl, maxWidth = 727) {
 		  return new Promise(async (resolve, reject) => {
 			try {
