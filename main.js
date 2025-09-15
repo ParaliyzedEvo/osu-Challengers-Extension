@@ -594,77 +594,85 @@
 		console.error("Failed to render Top 3 performances:", err);
 		}
 		async function svgToCanvas(svgSourceUrl, maxWidth = 727) {
-		  return new Promise(async (resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			try {
-			  console.log('Fetching SVG from:', svgSourceUrl);
-			  const svgText = await new Promise((resolveMsg, rejectMsg) => {
-				chrome.runtime.sendMessage(
-				  { type: 'fetch', url: svgSourceUrl, method: 'GET', headers: {}, body: null },
-				  (response) => {
-					if (chrome.runtime.lastError) return rejectMsg(chrome.runtime.lastError.message);
-					if (!response || typeof response.data !== 'string') {
-					  console.error('[OTC] ❌ Invalid response from background:', response);
-					  return rejectMsg('Invalid background response');
+			console.log('Fetching SVG from:', svgSourceUrl);
+			const svgText = await new Promise((resolveFetch, rejectFetch) => {
+				GM.xmlHttpRequest({
+				method: 'GET',
+				url: svgSourceUrl,
+				onload: (response) => {
+					if (response.status >= 200 && response.status < 300) {
+					resolveFetch(response.responseText);
+					} else {
+					rejectFetch(`HTTP error: ${response.status}`);
 					}
-					resolveMsg(response.data);
-				  }
-				);
-			  });
-			  
-			  console.log('SVG fetch successful, length:', svgText?.length);
-			  
-			  if (!svgText || typeof svgText !== 'string') {
+				},
+				onerror: (err) => rejectFetch(err),
+				});
+			});
+
+			console.log('SVG fetch successful, length:', svgText?.length);
+
+			if (!svgText || typeof svgText !== 'string') {
 				throw new Error('Invalid SVG response');
-			  }
-			  const tempDiv = document.createElement('div');
-			  tempDiv.style.position = 'absolute';
-			  tempDiv.style.left = '-9999px';
-			  tempDiv.innerHTML = svgText;
-			  document.body.appendChild(tempDiv);
-			  
-			  const svgElement = tempDiv.querySelector('svg');
-			  if (!svgElement) {
+			}
+
+			const tempDiv = document.createElement('div');
+			tempDiv.style.position = 'absolute';
+			tempDiv.style.left = '-9999px';
+			tempDiv.innerHTML = svgText;
+			document.body.appendChild(tempDiv);
+			const svgElement = tempDiv.querySelector('svg');
+			if (!svgElement) {
 				document.body.removeChild(tempDiv);
 				reject(new Error('No SVG found in response'));
 				return;
-			  }
-			  const svgWidth = parseFloat(svgElement.getAttribute('width')) || maxWidth;
-			  const svgHeight = parseFloat(svgElement.getAttribute('height')) || (svgWidth * 0.3);
-			  
-			  console.log('SVG dimensions:', svgWidth, 'x', svgHeight);
-			  const canvas = document.createElement('canvas');
-			  const ctx = canvas.getContext('2d');
-			  const dpr = window.devicePixelRatio || 1;
-			  canvas.width = svgWidth * dpr;
-			  canvas.height = svgHeight * dpr;
-			  canvas.style.width = `${Math.min(svgWidth, maxWidth)}px`;
-			  canvas.style.height = `${svgHeight * (Math.min(svgWidth, maxWidth) / svgWidth)}px`;
-			  
-			  ctx.scale(dpr, dpr);
-			  const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-			  const svgDataUrl = URL.createObjectURL(svgBlob);
-			  
-			  const img = new Image();
-			  img.onload = () => {
+			}
+			const displayWidth = 727;
+			const displayHeight = 130;
+
+			console.log('Display dimensions:', displayWidth, 'x', displayHeight);
+
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+			const dpr = window.devicePixelRatio || 1;
+
+			canvas.width = displayWidth * dpr;
+			canvas.height = displayHeight * dpr;
+			canvas.style.width = `${displayWidth}px`;
+			canvas.style.height = `${displayHeight}px`;
+			ctx.scale(dpr, dpr);
+
+			const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+			const svgDataUrl = URL.createObjectURL(svgBlob);
+			const img = new Image();
+			img.onload = () => {
 				console.log('SVG image loaded successfully');
-				ctx.drawImage(img, 0, 0, svgWidth, svgHeight);
+				ctx.clearRect(0, 0, displayWidth, displayHeight);
+				ctx.drawImage(img, 0, 0, displayWidth, displayHeight);
+				
 				URL.revokeObjectURL(svgDataUrl);
 				document.body.removeChild(tempDiv);
 				resolve(canvas);
-			  };
-			  img.onerror = (err) => {
+			};
+			
+			img.onerror = (err) => {
 				console.error('Image load error:', err);
 				URL.revokeObjectURL(svgDataUrl);
 				document.body.removeChild(tempDiv);
 				reject(new Error('Failed to load SVG as image'));
-			  };
-			  img.src = svgDataUrl;
-			  
+			};
+			
+			img.width = displayWidth;
+			img.height = displayHeight;
+			img.src = svgDataUrl;
+
 			} catch (error) {
-			  console.error('SVG to canvas error:', error);
-			  reject(error);
+			console.error('SVG to canvas error:', error);
+			reject(error);
 			}
-		  });
+		});
 		}
 		try {
 		  const canvas = await svgToCanvas(svgUrl, 727);
