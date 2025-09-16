@@ -5,7 +5,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.2.0 start');
+	  console.log('[OTC] 🔥 v2.3.4 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
