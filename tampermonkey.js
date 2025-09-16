@@ -38,13 +38,13 @@
 	  const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
 
 	  const BADGE_CONFIG = [
-		{ ids: [19637339, 22228239, 32657919], classMod: 'dev', title: 'Developers', src: 'https://paraliyzed.net/img/dev.webp' },
-		{ ids: [15657407, 31708435], classMod: 'gfx', title: 'Effects Designer', src: 'https://paraliyzed.net/img/gfx.webp' },
-		{ ids: [24071806], classMod: 'pl', title: 'Project Lead', src: 'https://paraliyzed.net/img/lead.webp' },
-		{ ids: [19637339, 15657407], classMod: 'Strat', title: 'Strategist', src: 'https://paraliyzed.net/img/strat.webp' },
-		{ ids: [14540907, 17274052, 32657919, 16863950], classMod: 'qa', title: 'QA Tester', src: 'https://paraliyzed.net/img/qa.webp' },
-		{ ids: [4966334, 12577911], classMod: 'mapper', title: 'Mapper', src: 'https://paraliyzed.net/img/mapper.webp' },
-		{ ids: [15118952, 4125185, 29139453, 5052899], classMod: 'artist', title: 'Song Artist', src: 'https://paraliyzed.net/img/artist.webp' },
+		{ ids: [19637339, 22228239, 32657919], classMod: 'dev', title: 'Developers', src: 'https://git.paraliyzed.net/img_hosting/dev.webp' },
+		{ ids: [15657407, 31708435], classMod: 'gfx', title: 'Effects Designer', src: 'https://git.paraliyzed.net/img_hosting/gfx.webp' },
+		{ ids: [24071806], classMod: 'pl', title: 'Project Lead', src: 'https://git.paraliyzed.net/img_hosting/lead.webp' },
+		{ ids: [19637339, 15657407], classMod: 'Strat', title: 'Strategist', src: 'https://git.paraliyzed.net/img_hosting/strat.webp' },
+		{ ids: [14540907, 17274052, 32657919, 16863950], classMod: 'qa', title: 'QA Tester', src: 'https://git.paraliyzed.net/img_hosting/qa.webp' },
+		{ ids: [4966334, 12577911], classMod: 'mapper', title: 'Mapper', src: 'https://git.paraliyzed.net/img_hosting/mapper.webp' },
+		{ ids: [15118952, 4125185, 29139453, 5052899], classMod: 'artist', title: 'Song Artist', src: 'https://git.paraliyzed.net/img_hosting/artist.webp' },
 	  ];
 
 	  // Global styles
@@ -590,7 +590,7 @@
 					<div class="score-rank score-rank--full score-rank--${rank}"></div>
 					</div>
 					<div class="play-detail__detail">
-					<a class="play-detail__title u-ellipsis-overflow" href="https://osu.ppy.sh/beatmaps/${score.playlists?.beatmap_id || ''}">
+					<a class="play-detail__title u-ellipsis-overflow" href="https://www.challengersnexus.com/challenges/${score.playlists.challenges?.room_id || ''}">
 						${mapTitle} <small class="play-detail__artist">by ${mapArtist}</small>
 					</a>
 					<div class="play-detail__beatmap-and-time">
@@ -657,7 +657,7 @@
 				return;
 			}
 			const displayWidth = 727;
-			const c = 110;
+			const displayHeight = 110;
 
 			console.log('Display dimensions:', displayWidth, 'x', displayHeight);
 
