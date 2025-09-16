@@ -7,7 +7,7 @@
 // @downloadURL  https://github.com/ParaliyzedEvo/osu-Challengers-Extension/releases/latest/download/tampermoney.js
 // @author       Paraliyzed_evo and Thunderbirdo
 // @icon         https://osu.ppy.sh/favicon.ico
-// @version      2.3.3
+// @version      2.3.4
 // @description  Extension to view osu!Challenger stats on osu!Website.
 // @match        https://osu.ppy.sh/*
 // @connect      ppy.sh
