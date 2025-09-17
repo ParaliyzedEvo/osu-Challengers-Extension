@@ -14,10 +14,10 @@
 	  // Config
 	  const SUPABASE_URL = 'https://yqgqoxgykswytoswqpkj.supabase.co';
 	  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZ3FveGd5a3N3eXRvc3dxcGtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3MTkxNTEsImV4cCI6MjA2NDI5NTE1MX0.cIWfvz9dlSWwYy7QKSmWpEHc1KVzpB77VzB7TNhQ2ec';
-	  const TOGGLE_ON_IMG = 'https://up.heyuri.net/src/4597.png';
-	  const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
-	  const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
-	  const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
+	  // const TOGGLE_ON_IMG = 'https://up.heyuri.net/src/4597.png';
+	  // const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
+	  // const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
+	  // const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
 
 	  function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
 	  return new Promise((resolve, reject) => {
@@ -320,7 +320,7 @@
 	  
 	  try {
 		const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
-		const apiUser = apiData?.data?.user || {};
+		// const apiUser = apiData?.data?.user || {};
 		const apiStats = apiData?.data?.stats || {};
 		const apiStreaks = apiData?.data?.streaks || {};
 		if (!apiData) return console.warn('Invalid data from API.');
@@ -533,67 +533,79 @@
 					</div>`;
 		}).join("");
 		}
-
 		try {
-		const scores = apiData?.data?.scores || [];
-		if (scores.length) {
-			// sort by placement, then by score
-			const sortedScores = scores.sort((a, b) => {
-			if (a.calculated_rank !== b.calculated_rank) {
-				return a.calculated_rank - b.calculated_rank; // lower placement first
+			const scores = apiData?.data?.scores || [];
+			if (scores.length) {
+				// Filter scores to only current season
+				const currentSeasonName = `Season ${SEASON_ID}`;
+				const currentSeasonScores = scores.filter(score => 
+					score.playlists?.challenges?.seasons?.name === currentSeasonName
+				);
+				
+				if (currentSeasonScores.length) {
+					// Sort by placement, then by score
+					const sortedScores = currentSeasonScores.sort((a, b) => {
+						if (a.calculated_rank !== b.calculated_rank) {
+							return a.calculated_rank - b.calculated_rank; // lower placement first
+						}
+						return b.score - a.score; // then highest score
+					});
+					
+					const topThree = sortedScores.slice(0, 3);
+					const container = document.getElementById("top-performances");
+
+					topThree.forEach(score => {
+						const rank = getRank(score.accuracy);
+						const mapTitle = score.playlists?.beatmap_title || "Unknown";
+						const mapArtist = score.playlists?.beatmap_artist || "Unknown";
+						const mapDiff = score.playlists?.beatmap_version || "";
+						const acc = score.accuracy.toFixed(2) + "%";
+						const mods = renderMods(score.mods_detailed);
+						const placement = score.calculated_rank;
+
+						const html = `
+							<div class="play-detail play-detail--highlightable play-detail--pin-sortable">
+							<div class="play-detail__group play-detail__group--top">
+								<div class="play-detail__icon play-detail__icon--main">
+								<div class="score-rank score-rank--full score-rank--${rank}"></div>
+								</div>
+								<div class="play-detail__detail">
+								<a class="play-detail__title u-ellipsis-overflow" href="https://www.challengersnexus.com/challenges/${score.playlists.challenges?.room_id || ''}">
+									${mapTitle} <small class="play-detail__artist">by ${mapArtist}</small>
+								</a>
+								<div class="play-detail__beatmap-and-time">
+									<span class="play-detail__beatmap">${mapDiff}</span>
+									<span class="play-detail__time"><time datetime="${score.submitted_at}">${new Date(score.submitted_at).toLocaleDateString()}</time></span>
+								</div>
+								</div>
+							</div>
+							<div class="play-detail__group play-detail__group--bottom">
+								<div class="play-detail__score-detail play-detail__score-detail--score">
+								<div class="play-detail__score-detail-top-right">
+									<div class="play-detail__accuracy-and-weighted-pp">
+									<span class="play-detail__accuracy">${acc}</span>
+									</div>
+								</div>
+								</div>
+								<div class="play-detail__score-detail play-detail__score-detail--mods">
+								${mods}
+								</div>
+								<div class="play-detail__pp"><span>Rank #${placement}</span></div>
+							</div>
+							</div>
+						`;
+						container.innerHTML += html;
+					});
+				} else {
+					// No scores for current season
+					const container = document.getElementById("top-performances");
+					container.innerHTML = `<div style="text-align: center; color: #ccc; padding: 20px;">No scores found for current season.</div>`;
+				}
 			}
-			return b.score - a.score; // then highest score
-			});
-			const topThree = sortedScores.slice(0, 3);
-			const container = document.getElementById("top-performances");
-
-			topThree.forEach(score => {
-			const rank = getRank(score.accuracy);
-			const mapTitle = score.playlists?.beatmap_title || "Unknown";
-			const mapArtist = score.playlists?.beatmap_artist || "Unknown";
-			const mapDiff = score.playlists?.beatmap_version || "";
-			const acc = score.accuracy.toFixed(2) + "%";
-			const mods = renderMods(score.mods_detailed);
-			const placement = score.calculated_rank;
-
-			const html = `
-				<div class="play-detail play-detail--highlightable play-detail--pin-sortable">
-				<div class="play-detail__group play-detail__group--top">
-					<div class="play-detail__icon play-detail__icon--main">
-					<div class="score-rank score-rank--full score-rank--${rank}"></div>
-					</div>
-					<div class="play-detail__detail">
-					<a class="play-detail__title u-ellipsis-overflow" href="https://www.challengersnexus.com/challenges${score.playlists.challenges.name?.room_id || ''}">
-						${mapTitle} <small class="play-detail__artist">by ${mapArtist}</small>
-					</a>
-					<div class="play-detail__beatmap-and-time">
-						<span class="play-detail__beatmap">${mapDiff}</span>
-						<span class="play-detail__time"><time datetime="${score.submitted_at}">${new Date(score.submitted_at).toLocaleDateString()}</time></span>
-					</div>
-					</div>
-				</div>
-				<div class="play-detail__group play-detail__group--bottom">
-					<div class="play-detail__score-detail play-detail__score-detail--score">
-					<div class="play-detail__score-detail-top-right">
-						<div class="play-detail__accuracy-and-weighted-pp">
-						<span class="play-detail__accuracy">${acc}</span>
-						</div>
-					</div>
-					</div>
-					<div class="play-detail__score-detail play-detail__score-detail--mods">
-					${mods}
-					</div>
-					<div class="play-detail__pp"><span>Rank #${placement}</span></div>
-				</div>
-				</div>
-			`;
-			container.innerHTML += html;
-			});
-		}
 		} catch (err) {
-		console.error("Failed to render Top 3 performances:", err);
+			console.error("Failed to render Top 3 performances:", err);
 		}
-		async function svgToCanvas(svgSourceUrl, maxWidth = 727) {
+		async function svgToCanvas(svgSourceUrl) {
 		return new Promise(async (resolve, reject) => {
 			try {
 			console.log('Fetching SVG from:', svgSourceUrl);
