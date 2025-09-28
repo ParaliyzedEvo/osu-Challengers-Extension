@@ -10,3 +10,13 @@ Report issues or feature ideas [here](https://github.com/ParaliyzedEvo/osu-Chall
 Credits: 
 Card Design: [Rteuya](https://www.youtube.com/@eightysixgraphics)
 Web Design Concept: [Sourced](https://ko-fi.com/masonlorrain/posts)
+
+## Star History
+
+<a href="https://www.star-history.com/#ParaliyzedEvo/osu-Challengers-Extension&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ParaliyzedEvo/osu-Challengers-Extension&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ParaliyzedEvo/osu-Challengers-Extension&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ParaliyzedEvo/osu-Challengers-Extension&type=Date" />
+ </picture>
+</a>
