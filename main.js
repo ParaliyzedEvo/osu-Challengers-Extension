@@ -5,7 +5,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.3.4 start');
+	  console.log('[OTC] 🔥 v2.3.6 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -363,8 +363,7 @@
 
 		async function loadModsData() {
 		try {
-			const res = await fetch("https://raw.githubusercontent.com/ppy/osu-web/refs/heads/master/database/mods.json");
-			const modsData = await res.json();
+			const modsData = await crossOriginFetch("https://raw.githubusercontent.com/ppy/osu-web/refs/heads/master/database/mods.json");
 			const modTypes = {};
 			const modNames = {};
 			
@@ -487,19 +486,16 @@
 			try {
 			console.log('Fetching SVG from:', svgSourceUrl);
 			const svgText = await new Promise((resolveFetch, rejectFetch) => {
-				GM.xmlHttpRequest({
-				method: 'GET',
-				url: svgSourceUrl,
-				onload: (response) => {
-					if (response.status >= 200 && response.status < 300) {
-					resolveFetch(response.responseText);
-					} else {
-					rejectFetch(`HTTP error: ${response.status}`);
-					}
-				},
-				onerror: (err) => rejectFetch(err),
-				});
-			});
+                fetch(svgSourceUrl)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        }
+                        throw new Error(`HTTP error: ${response.status}`);
+                    })
+                    .then(resolveFetch)
+                    .catch(rejectFetch);
+            });
 
 			console.log('SVG fetch successful, length:', svgText?.length);
 
