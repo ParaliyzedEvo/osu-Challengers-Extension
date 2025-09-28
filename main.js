@@ -361,178 +361,55 @@
 		return "D";
 		}
 
-		function renderMods(mods) {
+		async function loadModsData() {
+		try {
+			const res = await fetch("https://raw.githubusercontent.com/ppy/osu-web/refs/heads/master/database/mods.json");
+			const modsData = await res.json();
+			const modTypes = {};
+			const modNames = {};
+			
+			modsData.forEach(ruleset => {
+				if (ruleset.Mods && Array.isArray(ruleset.Mods)) {
+					ruleset.Mods.forEach(mod => {
+						modTypes[mod.Acronym] = mod.Type || "Conversion";
+						modNames[mod.Acronym] = mod.Name || mod.Acronym;
+					});
+				}
+			});
+			
+			return { modTypes, modNames };
+		} catch (err) {
+			console.error("Failed to load mods.json:", err);
+			return { modTypes: {}, modNames: {} };
+		}
+	}
+
+	let modTypes = {};
+	let modNames = {};
+
+	async function initMods() {
+		const data = await loadModsData();
+		modTypes = data.modTypes;
+		modNames = data.modNames;
+	}
+
+	await initMods();
+
+	function renderMods(mods) {
 		if (!mods || !mods.length) return "";
-		const modTypes = {
-		// Difficulty Reduction
-		'EZ': 'DifficultyReduction',
-		'NF': 'DifficultyReduction',
-		'HT': 'DifficultyReduction',
-		'DC': 'DifficultyReduction',
-		'NR': 'DifficultyReduction',
-
-		// Difficulty Increase
-		'HR': 'DifficultyIncrease',
-		'SD': 'DifficultyIncrease',
-		'PF': 'DifficultyIncrease',
-		'DT': 'DifficultyIncrease',
-		'NC': 'DifficultyIncrease',
-		'FI': 'DifficultyIncrease',
-		'HD': 'DifficultyIncrease',
-		'CO': 'DifficultyIncrease',
-		'FL': 'DifficultyIncrease',
-		'BL': 'DifficultyIncrease',
-		'ST': 'DifficultyIncrease',
-		'AC': 'DifficultyIncrease',
-
-		// Automation
-		'AT': 'Automation',
-		'CN': 'Automation',
-		'RX': 'Automation',
-		'AP': 'Automation',
-		'SO': 'Automation',
-
-		// Conversion
-		'TP': 'Conversion',
-		'DA': 'Conversion',
-		'CL': 'Conversion',
-		'RD': 'Conversion',
-		'MR': 'Conversion',
-		'AL': 'Conversion',
-		'SW': 'Conversion',
-		'SG': 'Conversion',
-		'IN': 'Conversion',
-		'CS': 'Conversion',
-		'HO': 'Conversion',
-		'1K': 'Conversion',
-		'2K': 'Conversion',
-		'3K': 'Conversion',
-		'4K': 'Conversion',
-		'5K': 'Conversion',
-		'6K': 'Conversion',
-		'7K': 'Conversion',
-		'8K': 'Conversion',
-		'9K': 'Conversion',
-		'10K': 'Conversion',
-
-		// Fun
-		'TR': 'Fun',
-		'WG': 'Fun',
-		'SI': 'Fun',
-		'GR': 'Fun',
-		'DF': 'Fun',
-		'WU': 'Fun',
-		'WD': 'Fun',
-		'TC': 'Fun',
-		'BR': 'Fun',
-		'AD': 'Fun',
-		'FF': 'Fun',
-		'MU': 'Fun',
-		'NS': 'Fun',
-		'MG': 'Fun',
-		'RP': 'Fun',
-		'AS': 'Fun',
-		'FR': 'Fun',
-		'BU': 'Fun',
-		'SY': 'Fun',
-		'DP': 'Fun',
-		'BM': 'Fun',
-
-		// System
-		'SV2': 'System',
-		'TD': 'System',
-		};
-
-		const modNames = {
-		// Difficulty Reduction
-		'EZ': 'Easy',
-		'NF': 'No Fail',
-		'HT': 'Half Time',
-		'DC': 'Daycore',
-		'NR': 'No Release',
-
-		// Difficulty Increase
-		'HR': 'Hard Rock',
-		'SD': 'Sudden Death',
-		'PF': 'Perfect',
-		'DT': 'Double Time',
-		'NC': 'Nightcore',
-		'FI': 'Fade In',
-		'HD': 'Hidden',
-		'CO': 'Cover',
-		'FL': 'Flashlight',
-		'BL': 'Blinds',
-		'ST': 'Strict Tracking',
-		'AC': 'Accuracy Challenge',
-
-		// Automation
-		'AT': 'Autoplay',
-		'CN': 'Cinema',
-		'RX': 'Relax',
-		'AP': 'Autopilot',
-		'SO': 'Spun Out',
-
-		// Conversion
-		'TP': 'Target Practice',
-		'DA': 'Difficulty Adjust',
-		'CL': 'Classic',
-		'RD': 'Random',
-		'MR': 'Mirror',
-		'AL': 'Alternate',
-		'SW': 'Swap',
-		'SG': 'Single Tap',
-		'IN': 'Invert',
-		'CS': 'Constant Speed',
-		'HO': 'Hold Off',
-		'1K': '1 Key',
-		'2K': '2 Keys',
-		'3K': '3 Keys',
-		'4K': '4 Keys',
-		'5K': '5 Keys',
-		'6K': '6 Keys',
-		'7K': '7 Keys',
-		'8K': '8 Keys',
-		'9K': '9 Keys',
-		'10K': '10 Keys',
-
-		// Fun
-		'TR': 'Transform',
-		'WG': 'Wiggle',
-		'SI': 'Spin In',
-		'GR': 'Grow',
-		'DF': 'Deflate',
-		'WU': 'Wind Up',
-		'WD': 'Wind Down',
-		'TC': 'Traceable',
-		'BR': 'Barrel Roll',
-		'AD': 'Approach Different',
-		'FF': 'Floating Fruits',
-		'MU': 'Muted',
-		'NS': 'No Scope',
-		'MG': 'Magnetised',
-		'RP': 'Repel',
-		'AS': 'Adaptive Speed',
-		'FR': 'Freeze Frame',
-		'BU': 'Bubbles',
-		'SY': 'Synesthesia',
-		'DP': 'Depth',
-		'BM': 'Bloom',
-
-		// System
-		'SV2': 'Score V2',
-		'TD': 'Touch Device',
-		};
 		
 		return mods.map(mod => {
 			const acronym = mod.acronym;
-			const modType = modTypes[acronym] || 'Conversion';
+			const modType = modTypes[acronym] || "Conversion";
 			const modName = modNames[acronym] || acronym;
 			
-			return `<div class="mod mod--type-${modType}" data-orig-title="${modName}" data-hasqtip="8" aria-describedby="qtip-8">
-					<div class="mod__icon mod__icon--${acronym}" data-acronym="${acronym}"></div>
-					</div>`;
+			return `
+			<div class="mod mod--type-${modType}" data-orig-title="${modName}" data-hasqtip="8" aria-describedby="qtip-8">
+				<div class="mod__icon mod__icon--${acronym}" data-acronym="${acronym}"></div>
+			</div>
+			`;
 		}).join("");
-		}
+	}
 		try {
 			const scores = apiData?.data?.scores || [];
 			if (scores.length) {
