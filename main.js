@@ -118,7 +118,7 @@
 	  // Inject badge
 	  function createBadge({ classMod, title, src }) {
 	  const link = document.createElement('a');
-	  link.href = 'https://paraliyzed.net';
+	  link.href = 'https://www.challengersnexus.com/partners';
 	  link.style.cssText = 'height:31px;width:auto;display:inline-block;position:relative;';
 
 	  const img = document.createElement('img');
@@ -137,7 +137,7 @@
 	  const observer = new MutationObserver((_, obs) => {
 		const nameHeader = document.querySelector('.profile-info__info .profile-info__name');
 		if (nameHeader) {
-		  const existingBadges = nameHeader.querySelectorAll('a[href="https://paraliyzed.net"]');
+		  const existingBadges = nameHeader.querySelectorAll('a[href="https://www.challengersnexus.com/partners"]');
 		  const offset = 7 + (existingBadges.length * 23);
 
 		  badgeEl.style.transform = `translate(-${offset}px, 2px)`;
