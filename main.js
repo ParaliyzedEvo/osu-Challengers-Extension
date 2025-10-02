@@ -241,7 +241,7 @@
 		  observer.observe(document.body, { childList: true, subtree: true });
 		}
 
-	  const SEASON_ID = await callRpc('get_current_season_id', {});
+	  const SEASON_ID = (await callRpc('get_current_season_id', {})) - 1;
 	  const rawInt = await callRpc('get_user_id_from_osu_id', { p_osu_id: osuId });
 	  const internalId = typeof rawInt === 'number'
 		? rawInt
