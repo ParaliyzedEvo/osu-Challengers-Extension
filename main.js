@@ -5,7 +5,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.3.6 start');
+	  console.log('[OTC] 🔥 v2.3.7 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -329,7 +329,7 @@
 		const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
 		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 
-		const svgUrl = `https://api.paraliyzed.net/api/card?id=${osuId}&option=mini`;
+		const svgUrl = `https://www.challengersnexus.com/api/card?id=${osuId}&option=mini`;
 		let challengersHTML = `
 		  <div data-page-id="challengers">
 			<div class="page-extra">
