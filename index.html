@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>osu!Challengers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @font-face {
+      font-family: "UniSansCapsBold";
+      src: url("Uni Sans Heavy Caps.ttf") format("truetype");
+      font-weight: bold;
+    }
+
+    @font-face {
+      font-family: "UniSansCapsThin";
+      src: url("Uni Sans Thin Caps.ttf") format("truetype");
+      font-weight: normal;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #39252b;
+      width: 400px;
+      min-height: 500px;
+      padding: 1.5rem;
+      font-family: "UniSansCapsThin", sans-serif;
+      color: #ffffff;
+    }
+
+    .banner {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+
+    h1 {
+      font-family: "UniSansCapsBold", sans-serif;
+      font-size: 28px;
+      color: #ffffff;
+      margin: 1rem 0 0.5rem 0;
+      text-align: center;
+    }
+
+    h2 {
+      font-family: "UniSansCapsBold", sans-serif;
+      font-size: 18px;
+      color: #ffffff;
+      margin: 1.5rem 0 0.5rem 0;
+    }
+
+    p {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0.5rem 0;
+      line-height: 1.4;
+    }
+
+    .settings-section {
+      background-color: #513f45;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      color: #ffffff;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background-color: #2d1f23;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .toggle-switch.active {
+      background-color: #c792ea;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(24px);
+    }
+
+    .card-section {
+      background-color: #513f45;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .input-group {
+      margin: 0.75rem 0;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"] {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 14px;
+      color: #ffffff;
+      background-color: #2d1f23;
+      border: none;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input[type="text"]::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    input[type="text"]:focus {
+      background-color: #3d2f33;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 14px;
+      color: #ffffff;
+      background-color: #2d1f23;
+      border: none;
+      flex: 1;
+      height: 36px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #3d2f33;
+    }
+
+    button:active {
+      background-color: #1d0f13;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-message {
+      font-size: 11px;
+      text-align: center;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-message.success {
+      background-color: rgba(56, 161, 105, 0.2);
+      color: #38a169;
+      display: block;
+    }
+
+    .status-message.error {
+      background-color: rgba(245, 101, 101, 0.2);
+      color: #f56565;
+      display: block;
+    }
+
+    .link-display {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+      word-break: break-all;
+      padding: 0.5rem;
+      background-color: #2d1f23;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .link-display:hover {
+      background-color: #3d2f33;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer a {
+      color: #c792ea;
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .footer a:hover {
+      color: rgb(38, 150, 255);
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      pointer-events: none;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .toast {
+      background: #2d3748;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      margin-top: 10px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 320px;
+      pointer-events: auto;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #38a169;
+      border-left: 4px solid #2f855a;
+    }
+
+    .toast.error {
+      background: #f56565;
+      border-left: 4px solid #c53030;
+    }
+
+    .toast-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toast-container" id="toastContainer"></div>
+  <a href="https://discord.com/invite/rkURq6wVTU" target="_blank">
+    <img src="https://paraliyzed.net/img/horizontalbannerA.png" alt="Banner" class="banner">
+  </a>
+
+  <h1>osu!Challengers</h1>
+  <p style="text-align: center;">Extension Settings</p>
+
+  <!-- Settings Section -->
+  <div class="settings-section">
+    <h2>Display Settings</h2>
+    <div class="toggle-container">
+      <span class="toggle-label">Use Main Card</span>
+      <div class="toggle-switch" id="miniCardToggle">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Generator Section -->
+  <div class="card-section">
+    <h2>Card Generator</h2>
+    
+    <div class="input-group">
+      <label class="input-label">osu! User ID</label>
+      <input type="text" id="userIdInput" placeholder="Enter osu! user ID...">
+    </div>
+
+    <div class="button-group">
+      <button id="downloadMainBtn">Download Main</button>
+      <button id="downloadMiniBtn">Download Mini</button>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+    <div id="cardLinkDisplay" class="link-display" style="display: none;"></div>
+  </div>
+
+  <div class="footer">
+    <p><a href="https://github.com/ParaliyzedEvo/osu-Challengers-Extension" target="_blank">View on GitHub</a></p>
+    <p>Card Design: <a href="https://www.youtube.com/@eightysixgraphics" target="_blank">Rteuya</a></p>
+    <p>Web Design Concept: <a href="https://ko-fi.com/masonlorrain/posts" target="_blank">Sourced</a></p>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+
+</html>

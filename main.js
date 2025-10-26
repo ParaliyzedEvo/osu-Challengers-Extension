@@ -5,11 +5,21 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.3.7 start');
+	  console.log('[OTC] 🔥 v2.4.7 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
 	  console.log('[OTC] osuId =', osuId);
+
+	  const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
+		const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
+		
+		// Debug: Check storage on page load
+		browserAPI.storage.sync.get(['useFullCard'], (result) => {
+			console.log('[OTC Content] Storage check on page load:', result);
+			console.log('[OTC Content] useFullCard value:', result?.useFullCard);
+			console.log('[OTC Content] Will use:', result?.useFullCard ? 'FULL card' : 'MINI card');
+		});
 
 	  // Config
 	  const SUPABASE_URL = 'https://yqgqoxgykswytoswqpkj.supabase.co';
@@ -315,12 +325,9 @@
 	  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
 	  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
 	  if (!userPages) return console.warn('Could not find user profile container.');
-	  
 	  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
-	  
 	  try {
 		const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
-		// const apiUser = apiData?.data?.user || {};
 		const apiStats = apiData?.data?.stats || {};
 		const apiStreaks = apiData?.data?.streaks || {};
 		if (!apiData) return console.warn('Invalid data from API.');
@@ -328,8 +335,22 @@
 		const me = board?.find(r => r.is_target_user) || {};
 		const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
 		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
-
-		const svgUrl = `https://www.challengersnexus.com/api/card?id=${osuId}&option=mini`;
+		const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
+		const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
+		const storageResult = await new Promise((resolve) => {
+		browserAPI.storage.sync.get(['useFullCard'], (result) => {
+			console.log('[OTC Content] Reading storage in injectChallengersPage:', result);
+			resolve(result);
+		  });
+		});
+		
+		const useFullCard = storageResult?.useFullCard || false;
+		console.log('[OTC Content] useFullCard from storage:', useFullCard);
+		console.log('[OTC Content] Card type decision:', useFullCard ? 'FULL' : 'MINI');
+		const svgUrl = useFullCard 
+		? `https://www.challengersnexus.com/api/card?id=${osuId}`  // Full card
+		: `https://www.challengersnexus.com/api/card?id=${osuId}&option=mini`;  // Mini card (default)
+		console.log('[OTC Content] Final SVG URL:', svgUrl);
 		let challengersHTML = `
 		  <div data-page-id="challengers">
 			<div class="page-extra">
