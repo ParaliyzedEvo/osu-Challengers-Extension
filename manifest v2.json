@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "osu!Challengers",
-  "version": "1.1.3",
+  "version": "1.1.3.1",
   "description": "Extension to view osu!Challenger stats on osu!Website",
   "homepage_url": "https://github.com/ParaliyzedEvo/osu-Challengers-Extension",
   "icons": {
@@ -22,11 +22,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "{2a9f54db-e4a5-4e3d-8c77-e88abb6a9b91}",
-      "data_collection_permissions": {
-        "collects_data": false,
-        "required": ["none"]
-      }
+      "id": "{2a9f54db-e4a5-4e3d-8c77-e88abb6a9b91}"
     }
   },
   "permissions": [
