@@ -12,7 +12,7 @@
 	  console.log('[OTC] osuId =', osuId);
 
 	  const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
-		const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
+      const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
 		
 		// Debug: Check storage on page load
 		browserAPI.storage.sync.get(['useFullCard'], (result) => {
