@@ -1,7 +1,7 @@
 function debugLog(...args) {
 	browserAPI.storage.sync.get(['debug'], ({ debug }) => {
 		if (debug) {
-			console.log('[OTC Popup]', ...args);
+			console.log(...args);
 		}
 	});
 }
@@ -277,5 +277,26 @@ document.addEventListener('DOMContentLoaded', () => {
       browserAPI.tabs.create({ url: link.href });
     });
   });
-  
+
+  // Lara easter egg
+  const laraContainer = document.getElementById('laraContainer');
+  const laraSound = document.getElementById('laraSound');
+  let isRevealed = false;
+
+  laraContainer.addEventListener('click', () => {
+    if (!isRevealed) {
+      laraContainer.classList.add('revealed');
+      
+      setTimeout(() => {
+        laraSound.play().catch(err => {
+          console.log('Audio play failed:', err);
+        });
+      }, 67);
+      
+      isRevealed = true;
+    } else {
+      laraContainer.classList.remove('revealed');
+      isRevealed = false;
+    }
+  });
 });

@@ -312,6 +312,19 @@
       font-size: 13px;
       line-height: 1.4;
     }
+
+    #laraContainer.revealed {
+      bottom: 1px !important;
+    }
+
+    #laraContainer.revealed #laraText {
+      opacity: 1 !important;
+    }
+
+    #laraImage {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
   </style>
 </head>
 
@@ -374,6 +387,14 @@
     <p>Card Design: <a href="https://www.youtube.com/@eightysixgraphics" target="_blank">Rteuya</a></p>
     <p>Web Design Concept: <a href="https://ko-fi.com/masonlorrain/posts" target="_blank">Sourced</a></p>
   </div>
+
+  <div id="laraContainer" style="position: fixed; bottom: -80px; right: 10px; cursor: pointer; transition: bottom 0.5s ease; z-index: 10001;">
+  <div id="laraText" style="text-align: center; font-family: 'UniSansCapsBold', sans-serif; font-size: 16px; color: #c792ea; margin-bottom: 3px; opacity: 0; transition: opacity 0.4s ease 0.1s;">YES!!!</div>
+  <img id="laraImage" src="lara.png" alt="Lara" style="width: 50px; height: auto; display: block;">
+  </div>
+
+  <audio id="laraSound" src="lara.wav" preload="auto"></audio>
+
 
   <script src="index.js"></script>
 </body>
