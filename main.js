@@ -2,6 +2,102 @@
   'use strict';
     let lastUrl = location.href;
 
+	// Snow effect for winter season
+	function createSnowEffect() {
+		const now = new Date();
+		const month = now.getMonth();
+		const day = now.getDate();
+
+		const isWinterSeason =
+			(month === 10 || month === 11) || (month === 0 && day === 1);
+
+		if (!isWinterSeason) return;
+
+		console.log('[OTC] ❄️ Adding snow effect for winter season!');
+
+		const snowStyles = `
+			.snowflake {
+			position: fixed;
+			top: 0;
+			z-index: 9999;
+			user-select: none;
+			cursor: default;
+			animation-name: snowfall;
+			animation-timing-function: linear;
+			animation-iteration-count: 1;
+			color: white;
+			font-size: 1em;
+			pointer-events: none;
+			}
+
+			@keyframes snowfall {
+				0% {
+					transform: translateY(0vh) rotate(0deg);
+					opacity: 1;
+				}
+				100% {
+					transform: translateY(100vh) rotate(360deg);
+					opacity: 0;
+				}
+			}
+
+			.snowflake:nth-of-type(2n) {
+			animation-duration: 12s;
+			font-size: 0.8em;
+			}
+
+			.snowflake:nth-of-type(3n) {
+			animation-duration: 18s;
+			font-size: 1.2em;
+			}
+
+			.snowflake:nth-of-type(4n) {
+			animation-duration: 15s;
+			font-size: 0.9em;
+			}
+
+			.snowflake:nth-of-type(5n) {
+			animation-duration: 20s;
+			font-size: 1.1em;
+			}
+		`;
+
+		const styleSheet = document.createElement('style');
+		styleSheet.textContent = snowStyles;
+		document.head.appendChild(styleSheet);
+		const snowContainer = document.createElement('div');
+		snowContainer.id = 'otc-snow-container';
+		snowContainer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;';
+		document.body.appendChild(snowContainer);
+		const snowflakeChars = ['❄', '❅', '❆'];
+		const maxSnowflakes = 727;
+		const spawnInterval = 10;
+		let activeSnowflakes = 0;
+
+		function createSnowflake() {
+			if (activeSnowflakes >= maxSnowflakes) return;
+
+			const snowflake = document.createElement('div');
+			snowflake.className = 'snowflake';
+			snowflake.textContent =
+				snowflakeChars[Math.floor(Math.random() * snowflakeChars.length)];
+
+			snowflake.style.left = Math.random() * 100 + '%';
+			snowflake.style.top = '-40px';
+			const size = 0.7 + Math.random() * 1.3;
+			snowflake.style.fontSize = size + 'em';
+			const duration = 8 + Math.random() * 12;
+			snowflake.style.animationDuration = duration + 's';
+			activeSnowflakes++;
+			snowContainer.appendChild(snowflake);
+			snowflake.addEventListener('animationend', () => {
+				snowflake.remove();
+				activeSnowflakes--;
+			});
+		}
+		setInterval(createSnowflake, spawnInterval);
+	}
+
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
@@ -268,6 +364,10 @@
 	  if (!internalId) {
 		injectNoProfileMessage();
 		return;
+	  }
+
+	  if (!document.getElementById('otc-snow-container')) {
+		createSnowEffect();
 	  }
 
 	  const board = await callRpc('get_season_leaderboard_with_user', {
