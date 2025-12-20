@@ -1,9 +1,23 @@
+function debugLog(...args) {
+	browserAPI.storage.sync.get(['debug'], ({ debug }) => {
+		if (debug) {
+			console.log('[OTC Popup]', ...args);
+		}
+	});
+}
+
+function isWinterSeason() {
+		const now = new Date();
+		const month = now.getMonth();
+		const day = now.getDate();
+		return (month === 10 || month === 11 || (month === 0 && day === 1));
+}
+
 // Detect browser API based on manifest version
 const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
 const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
-
-console.log('[OTC Popup] Manifest version:', chrome.runtime.getManifest().manifest_version);
-console.log('[OTC Popup] Using API:', isManifestV2 ? 'browser (Firefox/MV2)' : 'chrome (Chrome/MV3)');
+debugLog('[OTC Popup] Manifest version:', chrome.runtime.getManifest().manifest_version);
+debugLog('[OTC Popup] Using API:', isManifestV2 ? 'browser (Firefox/MV2)' : 'chrome (Chrome/MV3)');
 
 // Toast notification function
 function showToast(message, type = 'success') {
@@ -40,36 +54,99 @@ function isValidOsuId(id) {
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Load saved settings
-  browserAPI.storage.sync.get(['useFullCard'], (result) => {
-    const miniCardToggle = document.getElementById('miniCardToggle');
-    if (result && result.useFullCard) {
-      miniCardToggle.classList.add('active');
-    }
-  });
+	const miniCardToggle = document.getElementById('miniCardToggle');
+	const debugToggle = document.getElementById('debugToggle');
+	const snowToggle = document.getElementById('snowToggle');
+	const snowAmountInput = document.getElementById('snowAmountInput');
 
-// Toggle card setting
-  document.getElementById('miniCardToggle').addEventListener('click', function() {
+	browserAPI.storage.sync.get(
+    ['useFullCard', 'debug', 'snowEnabled', 'snowAmount'],
+    (res) => {
+      if (res.useFullCard) miniCardToggle.classList.add('active');
+      if (res.debug) debugToggle.classList.add('active');
+      
+      const snowEnabledValue = res.snowEnabled ?? true;
+      if (snowEnabledValue) { snowToggle.classList.add('active'); }
+      
+      snowAmountInput.value = res.snowAmount ?? 727;
+      const defaults = {};
+      if (res.snowEnabled === undefined) defaults.snowEnabled = true;
+      if (res.snowAmount === undefined) defaults.snowAmount = 727;
+      
+      if (Object.keys(defaults).length > 0) {
+        browserAPI.storage.sync.set(defaults, () => {
+          debugLog('[OTC Popup] Set defaults:', defaults);
+        });
+      }
+    }
+  );
+  
+  // Hide snow options if not winter season
+	if (!isWinterSeason()) {
+		snowToggle.style.display = 'none';
+		snowAmountInput.closest('.input-group').style.display = 'none';
+		snowToggle.closest('.toggle-container').style.display = 'none';
+	}
+
+	//Main card toggle
+	miniCardToggle.addEventListener('click', function () {
     this.classList.toggle('active');
     const useFullCard = this.classList.contains('active');
-    
-    console.log('[OTC Popup] Toggle clicked! New state:', useFullCard ? 'full card' : 'mini card');
-    
+
     browserAPI.storage.sync.set({ useFullCard }, () => {
       if (browserAPI.runtime.lastError) {
-        console.error('[OTC Popup] Failed to save setting:', browserAPI.runtime.lastError);
         showToast('Failed to save setting', 'error');
       } else {
-        console.log('[OTC Popup] Setting saved successfully:', { useFullCard });
-        showToast('Setting saved! Refresh the osu! profile page to see changes.', 'success');
-        
-        // Verify it was saved
-        browserAPI.storage.sync.get(['useFullCard'], (result) => {
-          console.log('[OTC Popup] Verification - storage now contains:', result);
-        });
+        showToast('Setting saved! Reload the page to see changes.', 'success');
       }
     });
   });
+
+	//Debug toggle
+	debugToggle.addEventListener('click', function () {
+		this.classList.toggle('active');
+		const debug = this.classList.contains('active');
+
+		browserAPI.storage.sync.set({ debug }, () => {
+      if (browserAPI.runtime.lastError) {
+				showToast('Failed to save setting', 'error');
+			} else {
+				showToast('Setting saved!', 'success');
+			}
+		});
+	});
+
+	//Snow toggle
+	snowToggle.addEventListener('click', function () {
+		this.classList.toggle('active');
+		const snowEnabled = this.classList.contains('active');
+
+		browserAPI.storage.sync.set({ snowEnabled }, () => {
+      if (browserAPI.runtime.lastError) {
+				showToast('Failed to save setting', 'error');
+			} else {
+				showToast('Setting saved!', 'success');
+			}
+		});
+	});
+
+	//Snow amount input
+	snowAmountInput.addEventListener('change', function () {
+		let snowAmount = parseInt(this.value, 10);
+
+		if (isNaN(snowAmount) || snowAmount < 0) {
+			snowAmount = 727;
+			this.value = snowAmount;
+		}
+
+		browserAPI.storage.sync.set({ snowAmount }, () => {
+      if (browserAPI.runtime.lastError) {
+				showToast('Failed to save setting', 'error');
+			} else {
+				showToast('Setting saved!', 'success');
+			}
+		});
+	});
 
   // Get current tab's osu! user ID if available
   browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {

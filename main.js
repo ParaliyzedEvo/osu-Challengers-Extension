@@ -1,17 +1,27 @@
 (function () {
   'use strict';
     let lastUrl = location.href;
+	let debugMode = false;
+
+	function debugLog(...args) {
+		browserAPI.storage.sync.get(['debug'], ({ debug }) => {
+			if (window.debugMode) {
+				console.log('[OTC Popup]', ...args);
+			}
+		});
+	}
 
 	// Snow effect for winter season
-	function createSnowEffect() {
+	function createSnowEffect(snowEnabled, snowAmount) {
 		const now = new Date();
 		const month = now.getMonth();
 		const day = now.getDate();
+		const isWinterSeason = (month === 10 || month === 11) || (month === 0 && day === 1);
 
-		const isWinterSeason =
-			(month === 10 || month === 11) || (month === 0 && day === 1);
-
-		if (!isWinterSeason) return;
+		if (!isWinterSeason || !snowEnabled) {
+			debugLog('[OTC] Snow effect disabled (season:', isWinterSeason, 'enabled:', snowEnabled, ')');
+			return;
+		}
 
 		console.log('[OTC] ❄️ Adding snow effect for winter season!');
 
@@ -70,7 +80,7 @@
 		snowContainer.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;';
 		document.body.appendChild(snowContainer);
 		const snowflakeChars = ['❄', '❅', '❆'];
-		const maxSnowflakes = 727;
+		const maxSnowflakes = snowAmount;
 		const spawnInterval = 10;
 		let activeSnowflakes = 0;
 
@@ -79,9 +89,7 @@
 
 			const snowflake = document.createElement('div');
 			snowflake.className = 'snowflake';
-			snowflake.textContent =
-				snowflakeChars[Math.floor(Math.random() * snowflakeChars.length)];
-
+			snowflake.textContent = snowflakeChars[Math.floor(Math.random() * snowflakeChars.length)];
 			snowflake.style.left = Math.random() * 100 + '%';
 			snowflake.style.top = '-40px';
 			const size = 0.7 + Math.random() * 1.3;
@@ -105,17 +113,39 @@
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
-	  console.log('[OTC] osuId =', osuId);
-
+	  debugLog('[OTC] osuId =', osuId);
 	  const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
       const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
-		
-		// Debug: Check storage on page load
+	    // Debug: Check storage on page load
 		browserAPI.storage.sync.get(['useFullCard'], (result) => {
-			console.log('[OTC Content] Storage check on page load:', result);
-			console.log('[OTC Content] useFullCard value:', result?.useFullCard);
-			console.log('[OTC Content] Will use:', result?.useFullCard ? 'FULL card' : 'MINI card');
+			debugLog('[OTC Content] Storage check on page load:', result);
+			debugLog('[OTC Content] useFullCard value:', result?.useFullCard);
+			debugLog('[OTC Content] Will use:', result?.useFullCard ? 'FULL card' : 'MINI card');
 		});
+
+	  const settings = await new Promise((resolve) => {
+		browserAPI.storage.sync.get(['useFullCard', 'debug', 'snowEnabled', 'snowAmount'], (result) => {
+			debugLog('[OTC] Settings loaded:', result);
+			resolve(result);
+		});
+	  });
+
+	  const useFullCard = settings?.useFullCard ?? false;
+	  const debugMode = settings?.debug ?? false;
+	  const snowEnabled = settings?.snowEnabled ?? true;
+	  const snowAmount = settings?.snowAmount ?? 727;
+	  window.debugMode = debugMode;
+	  if (settings?.snowEnabled === undefined || settings?.snowAmount === undefined) {
+		const defaults = {};
+		if (settings?.snowEnabled === undefined) defaults.snowEnabled = true;
+		if (settings?.snowAmount === undefined) defaults.snowAmount = 727;
+		browserAPI.storage.sync.set(defaults);
+	  }
+
+	  debugLog('[OTC] useFullCard:', useFullCard);
+	  debugLog('[OTC] debugMode:', debugMode);
+	  debugLog('[OTC] snowEnabled:', snowEnabled);
+	  debugLog('[OTC] snowAmount:', snowAmount);
 
 	  // Config
 	  const SUPABASE_URL = 'https://yqgqoxgykswytoswqpkj.supabase.co';
@@ -367,7 +397,7 @@
 	  }
 
 	  if (!document.getElementById('otc-snow-container')) {
-		createSnowEffect();
+		createSnowEffect(snowEnabled, snowAmount);
 	  }
 
 	  const board = await callRpc('get_season_leaderboard_with_user', {
@@ -435,22 +465,10 @@
 		const me = board?.find(r => r.is_target_user) || {};
 		const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
 		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
-		const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
-		const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
-		const storageResult = await new Promise((resolve) => {
-		browserAPI.storage.sync.get(['useFullCard'], (result) => {
-			console.log('[OTC Content] Reading storage in injectChallengersPage:', result);
-			resolve(result);
-		  });
-		});
-		
-		const useFullCard = storageResult?.useFullCard || false;
-		console.log('[OTC Content] useFullCard from storage:', useFullCard);
-		console.log('[OTC Content] Card type decision:', useFullCard ? 'FULL' : 'MINI');
 		const svgUrl = useFullCard 
 		? `https://www.challengersnexus.com/api/card?id=${osuId}`  // Full card
 		: `https://www.challengersnexus.com/api/card?id=${osuId}&option=mini`;  // Mini card (default)
-		console.log('[OTC Content] Final SVG URL:', svgUrl);
+		debugLog('[OTC Content] Final SVG URL:', svgUrl);
 		let challengersHTML = `
 		  <div data-page-id="challengers">
 			<div class="page-extra">
@@ -605,7 +623,7 @@
 		async function svgToCanvas(svgSourceUrl) {
 		return new Promise(async (resolve, reject) => {
 			try {
-			console.log('Fetching SVG from:', svgSourceUrl);
+			debugLog('Fetching SVG from:', svgSourceUrl);
 			const svgText = await new Promise((resolveFetch, rejectFetch) => {
                 fetch(svgSourceUrl)
                     .then(response => {
@@ -618,7 +636,7 @@
                     .catch(rejectFetch);
             });
 
-			console.log('SVG fetch successful, length:', svgText?.length);
+			debugLog('SVG fetch successful, length:', svgText?.length);
 
 			if (!svgText || typeof svgText !== 'string') {
 				throw new Error('Invalid SVG response');
@@ -638,7 +656,7 @@
 			const displayWidth = 727;
 			const displayHeight = 110;
 
-			console.log('Display dimensions:', displayWidth, 'x', displayHeight);
+			debugLog('Display dimensions:', displayWidth, 'x', displayHeight);
 
 			const canvas = document.createElement('canvas');
 			const ctx = canvas.getContext('2d');
@@ -724,11 +742,35 @@
 		console.error('Failed to inject Challengers page:', err);
 	  }
 	}
-	console.log("[OTC] internalId = " + internalId);
+	debugLog("[OTC] internalId = " + internalId);
 	await injectChallengersPage(internalId);
 	waitForChallengersTabContainer();
 }
-  runScript();
+
+	const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
+	const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
+
+	let isFirstLoad = true;
+	browserAPI.storage.onChanged.addListener((changes, namespace) => {
+		if (namespace === 'sync') {
+			debugLog('[OTC] Storage changed:', changes);
+
+			if (isFirstLoad) {
+				isFirstLoad = false;
+				debugLog('[OTC] Skipping reload - first load defaults');
+				return;
+			}
+
+			if (changes.useFullCard || changes.snowEnabled || changes.snowAmount) {
+				debugLog('[OTC] Reloading due to user settings change');
+				location.reload();
+			}
+
+			if (changes.debug) { window.debugMode = changes.debug.newValue; }
+		}
+	});
+
+	runScript();
 
   const pushState = history.pushState;
   const replaceState = history.replaceState;

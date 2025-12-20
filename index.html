@@ -53,7 +53,7 @@
       font-family: "UniSansCapsBold", sans-serif;
       font-size: 18px;
       color: #ffffff;
-      margin: 1.5rem 0 0.5rem 0;
+      margin: 0.5rem 0 0.5rem 0;
     }
 
     p {
@@ -148,6 +148,27 @@
     }
 
     input[type="text"]:focus {
+      background-color: #3d2f33;
+    }
+
+    input[type="number"] {
+      font-family: "UniSansCapsThin", sans-serif;
+      font-size: 14px;
+      color: #ffffff;
+      background-color: #2d1f23;
+      border: none;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input[type="number"]::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    input[type="number"]:focus {
       background-color: #3d2f33;
     }
 
@@ -311,6 +332,22 @@
       <div class="toggle-switch" id="miniCardToggle">
         <div class="toggle-slider"></div>
       </div>
+    </div>
+    <div class="toggle-container">
+      <span class="toggle-label">Enable debug logs</span>
+      <div class="toggle-switch" id="debugToggle">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+    <div class="toggle-container">
+      <span class="toggle-label">Enable snow</span>
+      <div class="toggle-switch" id="snowToggle">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label" style="font-size: 14px; color: white;">Snow Particles</label>
+      <input type="number" id="snowAmountInput" min="0" step="1" placeholder="727"/>
     </div>
   </div>
 
