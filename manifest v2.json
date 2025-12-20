@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "osu!Challengers",
-  "version": "1.1.5",
+  "version": "1.2.5",
   "description": "Extension to view osu!Challenger stats on osu!Website",
   "homepage_url": "https://github.com/ParaliyzedEvo/osu-Challengers-Extension",
   "icons": {
