@@ -133,12 +133,12 @@
 	  const useFullCard = settings?.useFullCard ?? false;
 	  const debugMode = settings?.debug ?? false;
 	  const snowEnabled = settings?.snowEnabled ?? true;
-	  const snowAmount = settings?.snowAmount ?? 727;
+	  const snowAmount = settings?.snowAmount ?? 130;
 	  window.debugMode = debugMode;
 	  if (settings?.snowEnabled === undefined || settings?.snowAmount === undefined) {
 		const defaults = {};
 		if (settings?.snowEnabled === undefined) defaults.snowEnabled = true;
-		if (settings?.snowAmount === undefined) defaults.snowAmount = 727;
+		if (settings?.snowAmount === undefined) defaults.snowAmount = 130;
 		browserAPI.storage.sync.set(defaults);
 	  }
 

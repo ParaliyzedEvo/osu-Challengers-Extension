@@ -68,10 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const snowEnabledValue = res.snowEnabled ?? true;
       if (snowEnabledValue) { snowToggle.classList.add('active'); }
       
-      snowAmountInput.value = res.snowAmount ?? 727;
+      snowAmountInput.value = res.snowAmount ?? 130;
       const defaults = {};
       if (res.snowEnabled === undefined) defaults.snowEnabled = true;
-      if (res.snowAmount === undefined) defaults.snowAmount = 727;
+      if (res.snowAmount === undefined) defaults.snowAmount = 130;
       
       if (Object.keys(defaults).length > 0) {
         browserAPI.storage.sync.set(defaults, () => {
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		let snowAmount = parseInt(this.value, 10);
 
 		if (isNaN(snowAmount) || snowAmount < 0) {
-			snowAmount = 727;
+			snowAmount = 130;
 			this.value = snowAmount;
 		}
 
