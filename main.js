@@ -376,7 +376,8 @@
 		  observer.observe(document.body, { childList: true, subtree: true });
 		}
 
-	  const SEASON_ID = (await callRpc('get_current_season_id', {}));
+	  const res = await callRpc('get_current_season', {});
+	  const { season_id: SEASON_ID, season_name: SEASON_NAME } = res[0];
 	  const rawInt = await callRpc('get_user_id_from_osu_id', { p_osu_id: osuId });
 	  const internalId = typeof rawInt === 'number'
 		? rawInt
@@ -551,7 +552,7 @@
 			const scores = apiData?.data?.scores || [];
 			if (scores.length) {
 				// Filter scores to only current season
-				const currentSeasonName = `Season ${SEASON_ID - 1}`;
+				const currentSeasonName = SEASON_NAME;
 				const currentSeasonScores = scores.filter(score => 
 					score.playlists?.challenges?.seasons?.name === currentSeasonName
 				);
