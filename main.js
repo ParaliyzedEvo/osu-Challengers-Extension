@@ -5,7 +5,7 @@
 	function debugLog(...args) {
 		browserAPI.storage.sync.get(['debug'], ({ debug }) => {
 			if (window.debugMode) {
-				console.log('[OTC Popup]', ...args);
+				console.log(...args);
 			}
 		});
 	}
@@ -108,7 +108,7 @@
 	async function runScript() {
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
-	  console.log('[OTC] 🔥 v2.5.9 start');
+	  console.log('[OTC] 🔥 v2.6.0 start');
 
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
@@ -147,8 +147,8 @@
 	  debugLog('[OTC] snowAmount:', snowAmount);
 
 	  // Config
-	  const SUPABASE_URL = 'https://yqgqoxgykswytoswqpkj.supabase.co';
-	  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxZ3FveGd5a3N3eXRvc3dxcGtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3MTkxNTEsImV4cCI6MjA2NDI5NTE1MX0.cIWfvz9dlSWwYy7QKSmWpEHc1KVzpB77VzB7TNhQ2ec';
+	  const SUPABASE_URL = 'https://msyttvgjzsegrdciplck.supabase.co';
+	  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zeXR0dmdqenNlZ3JkY2lwbGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MjQyNTksImV4cCI6MjA4NTEwMDI1OX0.sRyQoirmz6JtWNxE62vjjXaBzzLOP6sP1xjUzputSpk';
 	  // const TOGGLE_ON_IMG = 'https://up.heyuri.net/src/4597.png';
 	  // const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
 	  // const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
@@ -335,21 +335,23 @@
 		}));
 
 	  async function callRpc(name, params) {
-		const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
-		  method: 'POST',
-		  headers: {
-			'apikey': SUPABASE_ANON_KEY,
-			'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-		  },
-		  body: JSON.stringify(params),
-		});
-		if (!res.ok) {
-		  console.error(`[OTC] ❌ RPC ${name} failed`, res.status, await res.text());
-		  return null;
+		try {
+			const data = await crossOriginFetch(
+			`${SUPABASE_URL}/rest/v1/rpc/${name}`,
+			'POST',
+			{
+				apikey: SUPABASE_ANON_KEY,
+				Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+				'Content-Type': 'application/json',
+				Accept: 'application/json',
+			},
+			JSON.stringify(params)
+			);
+			return data;
+		} catch (err) {
+			console.error(`[OTC] ❌ RPC ${name} failed`, err);
+			return null;
 		}
-		return await res.json();
 	  }
 
 	  function injectNoProfileMessage() {
@@ -400,17 +402,17 @@
 		createSnowEffect(snowEnabled, snowAmount);
 	  }
 
-	  const board = await callRpc('get_season_leaderboard_with_user', {
-		user_id_param: internalId,
-		season_id_param: SEASON_ID,
-	  });
+	  const boardRaw = await callRpc('get_season_leaderboard_with_user', {user_id_param: internalId, season_id_param: SEASON_ID,});
+	  const board = Array.isArray(boardRaw) ? boardRaw : (boardRaw && typeof boardRaw === 'object') ? [boardRaw] : [];
 
+	  /*
 	  const me = board?.find(r => r.is_target_user) || {
 		position: 0,
 		challenges_participated: 0,
 		average_accuracy: 0,
 		percentile: 0,
 	  };
+	  */
 
 	  function injectChallengersTab() {
 		  const osuPage = document.querySelector('.osu-page.osu-page--generic-compact');
@@ -456,6 +458,12 @@
 	  const userPages = osuPage?.querySelector('.user-profile-pages.ui-sortable');
 	  if (!userPages) return console.warn('Could not find user profile container.');
 	  const fmtPct = v => typeof v === 'number' ? v.toFixed(2) + '%' : '-';
+	  function fmtTopPercent(me) {
+		if (!me || typeof me.percentile !== 'number') return '-';
+		if (me.position === 1) return '0.01%';
+		const top = 100 - me.percentile;
+		return top <= 0 ? '0.01%' : top.toFixed(2) + '%';
+	  }
 	  try {
 		const apiData = await crossOriginFetch(`https://www.challengersnexus.com/api/user/profile/${internalId}`);
 		const apiStats = apiData?.data?.stats || {};
@@ -464,7 +472,7 @@
 
 		const me = board?.find(r => r.is_target_user) || {};
 		const statsData = await callRpc('get_user_stats', { p_user_id: internalId });
-		const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
+		// const comp = Array.isArray(statsData) ? statsData[0] || {} : {};
 		const svgUrl = useFullCard 
 		? `https://www.challengersnexus.com/api/card?id=${osuId}`  // Full card
 		: `https://www.challengersnexus.com/api/card?id=${osuId}&option=mini`;  // Mini card (default)
@@ -731,7 +739,7 @@
 			  </div>
 			  <div class="oc-challenger-container">
 				<div class="oc-stat"><div class="oc-stat-label">Seasonal Rank</div><div class="oc-stat-value">#${me.position ?? '-'}</div></div>
-				<div class="oc-stat"><div class="oc-stat-label">Top</div><div class="oc-stat-value">${fmtPct(100 - me.percentile)}</div></div>
+				<div class="oc-stat"><div class="oc-stat-label">Top</div><div class="oc-stat-value">${fmtTopPercent(me)}</div></div>
 				<div class="oc-stat"><div class="oc-stat-label">Total Score</div><div class="oc-stat-value">${apiStats.totalScorePoints ?? '-'}</div></div>
 				<div class="oc-stat"><div class="oc-stat-label">Total Plays</div><div class="oc-stat-value">${apiStats.totalScores ?? '-'}</div></div>
 			  </div>
