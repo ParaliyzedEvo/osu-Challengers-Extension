@@ -56,6 +56,7 @@ function isValidOsuId(id) {
 document.addEventListener('DOMContentLoaded', () => {
 	const miniCardToggle = document.getElementById('miniCardToggle');
 	const debugToggle = document.getElementById('debugToggle');
+  const challengesToggle = document.getElementById('challengesToggle');
 	const snowToggle = document.getElementById('snowToggle');
 	const snowAmountInput = document.getElementById('snowAmountInput');
 
@@ -64,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     (res) => {
       if (res.useFullCard) miniCardToggle.classList.add('active');
       if (res.debug) debugToggle.classList.add('active');
+
+      const challengesEnabled = res.challengesNotifEnabled ?? true;
+      if (challengesEnabled) challengesToggle.classList.add('active');
       
       const snowEnabledValue = res.snowEnabled ?? true;
       if (snowEnabledValue) { snowToggle.classList.add('active'); }
@@ -115,6 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		});
 	});
+
+  // Challenges notification toggle
+  challengesToggle.addEventListener('click', function () {
+    this.classList.toggle('active');
+    const challengesNotifEnabled = this.classList.contains('active');
+
+    browserAPI.storage.sync.set({ challengesNotifEnabled }, () => {
+      if (browserAPI.runtime.lastError) {
+        showToast('Failed to save setting', 'error');
+      } else {
+        showToast('Setting saved!', 'success');
+      }
+    });
+  });
 
 	//Snow toggle
 	snowToggle.addEventListener('click', function () {

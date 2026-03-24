@@ -106,6 +106,186 @@
 	}
 
 	async function runScript() {
+	  async function challengerNotification() {
+		if (location.pathname !== '/' && location.pathname !== '/home') return;
+
+		const settings = await new Promise(resolve =>
+			browserAPI.storage.sync.get(['challengesNotifEnabled'], resolve)
+		);
+
+		const enabled = settings.challengesNotifEnabled ?? true;
+		if (!enabled) return;
+
+		// Don't show if already on screen
+		if (document.getElementById('otc-challengers-banner')) return;
+
+		const roomIdRaw = await callRpc('get_latest_room_id', {});
+		const roomId = typeof roomIdRaw === 'number'
+			? roomIdRaw
+			: Array.isArray(roomIdRaw)
+			? roomIdRaw[0]
+			: roomIdRaw && typeof roomIdRaw === 'object'
+				? Object.values(roomIdRaw)[0]
+				: null;
+
+		if (!roomId) return;
+
+		showChallengersBanner(`https://www.challengersnexus.com/challenges/${roomId}`);
+		}
+
+		function showChallengersBanner(url) {
+		// Inject styles once
+		if (!document.getElementById('otc-banner-styles')) {
+			const style = document.createElement('style');
+			style.id = 'otc-banner-styles';
+			style.textContent = `
+			#otc-challengers-banner {
+				position: fixed;
+				bottom: -120px;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 99999;
+				background: linear-gradient(135deg, #2d1f23 0%, #513f45 100%);
+				border: 1px solid rgba(199, 146, 234, 0.4);
+				border-radius: 14px;
+				padding: 14px 20px;
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+				font-family: Torus, Inter, sans-serif;
+				transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+				min-width: 340px;
+				max-width: 480px;
+				white-space: nowrap;
+			}
+			#otc-challengers-banner.visible {
+				bottom: 32px;
+			}
+			#otc-banner-icon {
+				font-size: 28px;
+				flex-shrink: 0;
+			}
+			#otc-banner-text {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+				flex: 1;
+			}
+			#otc-banner-title {
+				font-size: 15px;
+				font-weight: 700;
+				color: #fff;
+				letter-spacing: 0.3px;
+			}
+			#otc-banner-sub {
+				font-size: 12px;
+				color: rgba(255,255,255,0.55);
+			}
+			#otc-banner-btn {
+				background: #c792ea;
+				color: #1a0f1e;
+				border: none;
+				border-radius: 8px;
+				padding: 8px 14px;
+				font-size: 13px;
+				font-weight: 700;
+				font-family: Torus, Inter, sans-serif;
+				cursor: pointer;
+				flex-shrink: 0;
+				transition: background 0.2s, transform 0.1s;
+			}
+			#otc-banner-btn:hover {
+				background: #d9a8ff;
+				transform: scale(1.04);
+			}
+			#otc-banner-close {
+				background: none;
+				border: none;
+				color: rgba(255,255,255,0.4);
+				font-size: 18px;
+				cursor: pointer;
+				padding: 0 0 0 4px;
+				line-height: 1;
+				transition: color 0.2s;
+				flex-shrink: 0;
+			}
+			#otc-banner-close:hover {
+				color: #fff;
+			}
+			`;
+			document.head.appendChild(style);
+		}
+
+		const banner = document.createElement('div');
+		banner.id = 'otc-challengers-banner';
+		banner.innerHTML = `
+			<img id="otc-banner-icon" src="https://www.challengersnexus.com/android-chrome-512x512.png" style="width:36px;height:36px;border-radius:6px;flex-shrink:0;" />
+			<div id="otc-banner-text">
+			<div id="otc-banner-title">Challengers is live!</div>
+			<div id="otc-banner-sub">A new challenge is waiting for you.</div>
+			</div>
+			<button id="otc-banner-btn">Take me there!</button>
+			<button id="otc-banner-close" title="Dismiss">✕</button>
+		`;
+		document.body.appendChild(banner);
+
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => banner.classList.add('visible'));
+		});
+
+		banner.querySelector('#otc-banner-btn').addEventListener('click', () => {
+			window.open(url, '_blank');
+			dismissBanner(banner);
+		});
+
+		banner.querySelector('#otc-banner-close').addEventListener('click', () => {
+			dismissBanner(banner);
+		});
+
+		setTimeout(() => dismissBanner(banner), 10000);
+		}
+
+		function dismissBanner(banner) {
+		banner.classList.remove('visible');
+		setTimeout(() => banner.remove(), 700);
+		}
+		
+	  const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
+      const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
+
+	  // Config
+	  const SUPABASE_URL = 'https://msyttvgjzsegrdciplck.supabase.co';
+	  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zeXR0dmdqenNlZ3JkY2lwbGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MjQyNTksImV4cCI6MjA4NTEwMDI1OX0.sRyQoirmz6JtWNxE62vjjXaBzzLOP6sP1xjUzputSpk';
+	  // const TOGGLE_ON_IMG = 'https://up.heyuri.net/src/4597.png';
+	  // const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
+	  // const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
+	  // const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
+
+	  function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
+		return new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage(
+			{ type: 'fetch', url, method, headers, body },
+			(response) => {
+				if (chrome.runtime.lastError) return reject(chrome.runtime.lastError.message);
+				if (!response || typeof response.data !== 'string') {
+				console.error('[OTC] ❌ Invalid response from background:', response);
+				return reject('Invalid background response');
+				}
+
+				try {
+				const parsed = JSON.parse(response.data);
+				resolve(parsed);
+				} catch (e) {
+				console.error('[OTC] ❌ Failed to parse JSON:');
+				reject(e);
+				}
+			}
+			);
+		});
+	  }
+
+	  await challengerNotification();
 	  if (!/^https:\/\/osu\.ppy\.sh\/(users|u)\/\d+/.test(location.href)) return;
 	  await new Promise(res => requestAnimationFrame(res));
 	  console.log('[OTC] 🔥 v2.6.0 start');
@@ -113,8 +293,6 @@
 	  const osuId = parseInt(location.pathname.split('/')[2], 10);
 	  if (!osuId) return;
 	  debugLog('[OTC] osuId =', osuId);
-	  const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
-      const browserAPI = isManifestV2 && typeof browser !== 'undefined' ? browser : chrome;
 	    // Debug: Check storage on page load
 		browserAPI.storage.sync.get(['useFullCard'], (result) => {
 			debugLog('[OTC Content] Storage check on page load:', result);
@@ -145,37 +323,6 @@
 	  debugLog('[OTC] debugMode:', debugMode);
 	  debugLog('[OTC] snowEnabled:', snowEnabled);
 	  debugLog('[OTC] snowAmount:', snowAmount);
-
-	  // Config
-	  const SUPABASE_URL = 'https://msyttvgjzsegrdciplck.supabase.co';
-	  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zeXR0dmdqenNlZ3JkY2lwbGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MjQyNTksImV4cCI6MjA4NTEwMDI1OX0.sRyQoirmz6JtWNxE62vjjXaBzzLOP6sP1xjUzputSpk';
-	  // const TOGGLE_ON_IMG = 'https://up.heyuri.net/src/4597.png';
-	  // const TOGGLE_OFF_IMG = 'https://up.heyuri.net/src/4595.png';
-	  // const RULES_IMG = 'https://up.heyuri.net/src/4600.png';
-	  // const RULES_HOVER_IMG = 'https://up.heyuri.net/src/4599.png';
-
-	  function crossOriginFetch(url, method = 'GET', headers = {}, body = null) {
-	  return new Promise((resolve, reject) => {
-		chrome.runtime.sendMessage(
-		  { type: 'fetch', url, method, headers, body },
-		  (response) => {
-			if (chrome.runtime.lastError) return reject(chrome.runtime.lastError.message);
-			if (!response || typeof response.data !== 'string') {
-			  console.error('[OTC] ❌ Invalid response from background:', response);
-			  return reject('Invalid background response');
-			}
-
-			try {
-			  const parsed = JSON.parse(response.data);
-			  resolve(parsed);
-			} catch (e) {
-			  console.error('[OTC] ❌ Failed to parse JSON:');
-			  reject(e);
-			}
-		  }
-		);
-	  });
-	  }
 
 	  const BADGE_CONFIG = [
 		{ ids: [19637339, 22228239, 32657919], classMod: 'dev', title: 'Developers', src: 'https://git.paraliyzed.net/img_hosting/dev.webp' },
