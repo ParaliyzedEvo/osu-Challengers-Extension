@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const snowAmountInput = document.getElementById('snowAmountInput');
 
 	browserAPI.storage.sync.get(
-    ['useFullCard', 'debug', 'snowEnabled', 'snowAmount'],
+    ['useFullCard', 'debug', 'challengesNotifEnabled', 'snowEnabled', 'snowAmount'],
     (res) => {
       if (res.useFullCard) miniCardToggle.classList.add('active');
       if (res.debug) debugToggle.classList.add('active');
@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       snowAmountInput.value = res.snowAmount ?? 130;
       const defaults = {};
+      if (res.challengesNotifEnabled === undefined) defaults.challengesNotifEnabled = true;
       if (res.snowEnabled === undefined) defaults.snowEnabled = true;
       if (res.snowAmount === undefined) defaults.snowAmount = 130;
       
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (browserAPI.runtime.lastError) {
 				showToast('Failed to save setting', 'error');
 			} else {
-				showToast('Setting saved!', 'success');
+				showToast('Setting saved! Reload the page to see changes.', 'success');
 			}
 		});
 	});
@@ -129,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (browserAPI.runtime.lastError) {
         showToast('Failed to save setting', 'error');
       } else {
-        showToast('Setting saved!', 'success');
+        showToast('Setting saved! Reload the page to see changes.', 'success');
       }
     });
   });
