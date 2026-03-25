@@ -243,7 +243,7 @@
 			dismissBanner(banner);
 		});
 
-		setTimeout(() => dismissBanner(banner), 10000);
+		setTimeout(() => dismissBanner(banner), 20000);
 		}
 
 		function dismissBanner(banner) {
