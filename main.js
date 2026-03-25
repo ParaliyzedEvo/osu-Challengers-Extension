@@ -110,13 +110,12 @@
 		if (location.pathname !== '/' && location.pathname !== '/home') return;
 
 		const settings = await new Promise(resolve =>
-			browserAPI.storage.sync.get(['challengesNotifEnabled'], resolve)
+			browserAPI.storage.sync.get(['challengesNotifEnabled', 'lastNotifShown', 'lastNotifRoomId'], resolve)
 		);
 
 		const enabled = settings.challengesNotifEnabled ?? true;
 		if (!enabled) return;
 
-		// Don't show if already on screen
 		if (document.getElementById('otc-challengers-banner')) return;
 
 		const roomIdRaw = await callRpc('get_latest_room_id', {});
@@ -129,6 +128,18 @@
 				: null;
 
 		if (!roomId) return;
+		const lastShown = settings.lastNotifShown ?? 0;
+		const lastRoomId = settings.lastNotifRoomId ?? null;
+		const now = Date.now();
+		const twentyFourHours = 24 * 60 * 60 * 1000;
+		const isNewRoom = roomId !== lastRoomId;
+		const isWithin24hrs = (now - lastShown) < twentyFourHours;
+		if (!isNewRoom && !isWithin24hrs) return;
+
+		//Reset timer
+		if (isNewRoom) {
+			browserAPI.storage.sync.set({ lastNotifShown: now, lastNotifRoomId: roomId });
+		}
 
 		showChallengersBanner(`https://www.challengersnexus.com/challenges/${roomId}`);
 		}
