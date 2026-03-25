@@ -223,7 +223,7 @@
 			<img id="otc-banner-icon" src="https://www.challengersnexus.com/android-chrome-512x512.png" style="width:36px;height:36px;border-radius:6px;flex-shrink:0;" />
 			<div id="otc-banner-text">
 			<div id="otc-banner-title">Challengers is live!</div>
-			<div id="otc-banner-sub">A new challenge is waiting for you.</div>
+			<div id="otc-banner-sub">A new Challenge is waiting for you.</div>
 			</div>
 			<button id="otc-banner-btn">Take me there!</button>
 			<button id="otc-banner-close" title="Dismiss">✕</button>
