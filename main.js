@@ -134,121 +134,125 @@
 		}
 
 		function showChallengersBanner(url) {
-		// Inject styles once
-		if (!document.getElementById('otc-banner-styles')) {
-			const style = document.createElement('style');
-			style.id = 'otc-banner-styles';
-			style.textContent = `
-			#otc-challengers-banner {
-				position: fixed;
-				bottom: -120px;
-				left: 50%;
-				transform: translateX(-50%);
-				z-index: 99999;
-				background: linear-gradient(135deg, #2d1f23 0%, #513f45 100%);
-				border: 1px solid rgba(199, 146, 234, 0.4);
-				border-radius: 14px;
-				padding: 14px 20px;
-				display: flex;
-				align-items: center;
-				gap: 16px;
-				box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-				font-family: Torus, Inter, sans-serif;
-				transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-				min-width: 340px;
-				max-width: 480px;
-				white-space: nowrap;
+			//Preload image
+			const preloadImg = new Image();
+			preloadImg.src = 'https://www.challengersnexus.com/android-chrome-512x512.png';
+
+			// Inject styles once
+			if (!document.getElementById('otc-banner-styles')) {
+				const style = document.createElement('style');
+				style.id = 'otc-banner-styles';
+				style.textContent = `
+				#otc-challengers-banner {
+					position: fixed;
+					bottom: -120px;
+					left: 50%;
+					transform: translateX(-50%);
+					z-index: 99999;
+					background: linear-gradient(135deg, #2d1f23 0%, #513f45 100%);
+					border: 1px solid rgba(199, 146, 234, 0.4);
+					border-radius: 14px;
+					padding: 14px 20px;
+					display: flex;
+					align-items: center;
+					gap: 16px;
+					box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+					font-family: Torus, Inter, sans-serif;
+					transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+					min-width: 340px;
+					max-width: 480px;
+					white-space: nowrap;
+				}
+				#otc-challengers-banner.visible {
+					bottom: 32px;
+				}
+				#otc-banner-icon {
+					font-size: 28px;
+					flex-shrink: 0;
+				}
+				#otc-banner-text {
+					display: flex;
+					flex-direction: column;
+					gap: 2px;
+					flex: 1;
+				}
+				#otc-banner-title {
+					font-size: 15px;
+					font-weight: 700;
+					color: #fff;
+					letter-spacing: 0.3px;
+				}
+				#otc-banner-sub {
+					font-size: 12px;
+					color: rgba(255,255,255,0.55);
+				}
+				#otc-banner-btn {
+					background: #c792ea;
+					color: #1a0f1e;
+					border: none;
+					border-radius: 8px;
+					padding: 8px 14px;
+					font-size: 13px;
+					font-weight: 700;
+					font-family: Torus, Inter, sans-serif;
+					cursor: pointer;
+					flex-shrink: 0;
+					transition: background 0.2s, transform 0.1s;
+				}
+				#otc-banner-btn:hover {
+					background: #d9a8ff;
+					transform: scale(1.04);
+				}
+				#otc-banner-close {
+					background: none;
+					border: none;
+					color: rgba(255,255,255,0.4);
+					font-size: 18px;
+					cursor: pointer;
+					padding: 0 0 0 4px;
+					line-height: 1;
+					transition: color 0.2s;
+					flex-shrink: 0;
+				}
+				#otc-banner-close:hover {
+					color: #fff;
+				}
+				`;
+				document.head.appendChild(style);
 			}
-			#otc-challengers-banner.visible {
-				bottom: 32px;
-			}
-			#otc-banner-icon {
-				font-size: 28px;
-				flex-shrink: 0;
-			}
-			#otc-banner-text {
-				display: flex;
-				flex-direction: column;
-				gap: 2px;
-				flex: 1;
-			}
-			#otc-banner-title {
-				font-size: 15px;
-				font-weight: 700;
-				color: #fff;
-				letter-spacing: 0.3px;
-			}
-			#otc-banner-sub {
-				font-size: 12px;
-				color: rgba(255,255,255,0.55);
-			}
-			#otc-banner-btn {
-				background: #c792ea;
-				color: #1a0f1e;
-				border: none;
-				border-radius: 8px;
-				padding: 8px 14px;
-				font-size: 13px;
-				font-weight: 700;
-				font-family: Torus, Inter, sans-serif;
-				cursor: pointer;
-				flex-shrink: 0;
-				transition: background 0.2s, transform 0.1s;
-			}
-			#otc-banner-btn:hover {
-				background: #d9a8ff;
-				transform: scale(1.04);
-			}
-			#otc-banner-close {
-				background: none;
-				border: none;
-				color: rgba(255,255,255,0.4);
-				font-size: 18px;
-				cursor: pointer;
-				padding: 0 0 0 4px;
-				line-height: 1;
-				transition: color 0.2s;
-				flex-shrink: 0;
-			}
-			#otc-banner-close:hover {
-				color: #fff;
-			}
+
+			const banner = document.createElement('div');
+			banner.id = 'otc-challengers-banner';
+			banner.innerHTML = `
+				<img id="otc-banner-icon" src="https://www.challengersnexus.com/android-chrome-512x512.png" style="width:36px;height:36px;border-radius:6px;flex-shrink:0;" />
+				<div id="otc-banner-text">
+				<div id="otc-banner-title">Challengers is live!</div>
+				<div id="otc-banner-sub">A new Challenge is waiting for you.</div>
+				</div>
+				<button id="otc-banner-btn">Take me there!</button>
+				<button id="otc-banner-close" title="Dismiss">✕</button>
 			`;
-			document.head.appendChild(style);
-		}
+			document.body.appendChild(banner);
 
-		const banner = document.createElement('div');
-		banner.id = 'otc-challengers-banner';
-		banner.innerHTML = `
-			<img id="otc-banner-icon" src="https://www.challengersnexus.com/android-chrome-512x512.png" style="width:36px;height:36px;border-radius:6px;flex-shrink:0;" />
-			<div id="otc-banner-text">
-			<div id="otc-banner-title">Challengers is live!</div>
-			<div id="otc-banner-sub">A new Challenge is waiting for you.</div>
-			</div>
-			<button id="otc-banner-btn">Take me there!</button>
-			<button id="otc-banner-close" title="Dismiss">✕</button>
-		`;
-		document.body.appendChild(banner);
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => banner.classList.add('visible'));
+			});
 
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => banner.classList.add('visible'));
-		});
+			banner.querySelector('#otc-banner-btn').addEventListener('click', () => {
+				window.open(url, '_blank');
+				dismissBanner(banner);
+			});
 
-		banner.querySelector('#otc-banner-btn').addEventListener('click', () => {
-			window.open(url, '_blank');
-			dismissBanner(banner);
-		});
+			banner.querySelector('#otc-banner-close').addEventListener('click', () => {
+				dismissBanner(banner);
+			});
 
-		banner.querySelector('#otc-banner-close').addEventListener('click', () => {
-			dismissBanner(banner);
-		});
+			setTimeout(() => dismissBanner(banner), 20000);
+			}
 
-		setTimeout(() => dismissBanner(banner), 20000);
-		}
-
-		function dismissBanner(banner) {
-		banner.classList.remove('visible');
-		setTimeout(() => banner.remove(), 700);
+			function dismissBanner(banner) {
+			banner.classList.remove('visible');
+			setTimeout(() => banner.remove(), 700);
 		}
 		
 	  const isManifestV2 = !chrome.runtime.getManifest().manifest_version || chrome.runtime.getManifest().manifest_version === 2;
