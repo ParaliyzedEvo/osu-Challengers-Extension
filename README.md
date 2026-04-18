@@ -9,7 +9,8 @@ Dynamic image generator moved to the profile section of [osu!Challengers](https:
 
 Report issues or feature ideas [here](https://github.com/ParaliyzedEvo/osu-Challengers-Extension/issues)
 
-Credits: 
+<ins>Credits:</ins>
+
 Card Design: [Rteuya](https://www.youtube.com/@eightysixgraphics)
 
 Web Design Concept: [Sourced](https://ko-fi.com/masonlorrain/posts)
