@@ -107,7 +107,14 @@
 
 	async function runScript() {
 	  async function challengerNotification() {
-		if (location.pathname !== '/' && location.pathname !== '/home') return;
+		const isAllowedPage = 
+			location.pathname === '/' ||
+			location.pathname === '/home' ||
+			location.pathname.startsWith('/beatmapsets') ||
+			location.pathname.startsWith('/users') ||
+			location.pathname.startsWith('/u/');
+
+		if (!isAllowedPage) return;
 
 		const settings = await new Promise(resolve =>
 			browserAPI.storage.sync.get(['challengesNotifEnabled', 'lastNotifShown', 'lastNotifRoomId'], resolve)
