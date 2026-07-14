@@ -20,7 +20,6 @@ Web Design Concept: [Sourced](https://ko-fi.com/masonlorrain/posts)
 <a href="https://www.star-history.com/?repos=ParaliyzedEvo%2Fosu-Challengers-Extension&type=date&legend=top-left">
  <picture>
    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=ParaliyzedEvo/osu-Challengers-Extension&type=date&theme=dark&legend=top-left&sealed_token=sug3dautXcJtiu2JtMvTxRKKKXFfiRi9ospVkpKfdgZ_BBkGKvYWLkw6xcY1vAqUmqnk79ZAp2mehqfJqhpsj2qLvWmFUKnGm4Qfe4xOcAyAoHRHtxuCqw" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=ParaliyzedEvo/osu-Challengers-Extension&type=date&legend=top-left&sealed_token=sug3dautXcJtiu2JtMvTxRKKKXFfiRi9ospVkpKfdgZ_BBkGKvYWLkw6xcY1vAqUmqnk79ZAp2mehqfJqhpsj2qLvWmFUKnGm4Qfe4xOcAyAoHRHtxuCqw" />
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=ParaliyzedEvo/osu-Challengers-Extension&type=date&legend=top-left&sealed_token=sug3dautXcJtiu2JtMvTxRKKKXFfiRi9ospVkpKfdgZ_BBkGKvYWLkw6xcY1vAqUmqnk79ZAp2mehqfJqhpsj2qLvWmFUKnGm4Qfe4xOcAyAoHRHtxuCqw" />
  </picture>
 </a>
